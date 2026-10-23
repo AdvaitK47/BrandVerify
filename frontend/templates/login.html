@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log In & Sign Up | BrandVerify</title>
+  <meta name="description" content="Log in to BrandVerify brand governance engine or create an account.">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <link rel="stylesheet" href="static/css/styles.css">
+</head>
+<body style="align-items: center; justify-content: center; padding: 40px 20px;">
+
+
+  <main style="width: 100%; max-width: 440px; z-index: 1;">
+    
+    <!-- Prominent Logo Header -->
+    <div style="text-align: center; margin-bottom: 24px;">
+      <a href="index.html" style="display: inline-block; margin-bottom: 14px;">
+        <img src="static/images/BrandVerify.svg" alt="BrandVerify" style="height: 36px; width: auto; object-fit: contain;">
+      </a>
+      <h1 id="login-heading" style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 6px;">
+        Log In to BrandVerify
+      </h1>
+      <p style="font-size: 0.88rem; color: var(--text-secondary);">
+        Intelligent Pre-Flight Brand Governance
+      </p>
+    </div>
+
+    <!-- Login / Sign Up Card -->
+    <div class="card" style="padding: 30px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);">
+      
+      <!-- Tabs: Log In / Sign Up -->
+      <div style="display: flex; gap: 8px; margin-bottom: 20px; background: rgba(0,0,0,0.5); padding: 4px; border-radius: 9999px; border: 1px solid var(--border-subtle);">
+        <button type="button" id="tab-login-btn" class="btn btn-white btn-sm" style="flex: 1;" onclick="toggleAuthMode('login')">
+          Log In
+        </button>
+        <button type="button" id="tab-signup-btn" class="btn btn-secondary btn-sm" style="flex: 1; border: none;" onclick="toggleAuthMode('signup')">
+          Sign Up
+        </button>
+      </div>
+
+      <form id="brandverify-login-form" onsubmit="AuthUI.handleSignInSubmit(event)">
+        <!-- Email -->
+        <div class="form-group">
+          <label class="form-label" for="login-email">Work Email</label>
+          <input type="email" id="login-email" class="form-control" value="alex@brandverify.ai" required>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <div class="form-label">
+            <label for="login-password">Password</label>
+            <a href="#" style="font-size: 0.78rem; color: var(--text-secondary);">Forgot?</a>
+          </div>
+          <input type="password" id="login-password" class="form-control" value="••••••••••••" required>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" id="submit-auth-btn" class="btn btn-white" style="width: 100%; padding: 12px; margin-bottom: 12px; font-size: 0.925rem;">
+          Log In
+        </button>
+
+        <!-- Skip / Explore as Guest -->
+        <button type="button" class="btn btn-secondary" style="width: 100%; padding: 12px; font-size: 0.925rem;" onclick="AuthUI.skipSignIn()">
+          Continue as Guest & Explore
+        </button>
+      </form>
+    </div>
+
+    <!-- Footer Back Link -->
+    <div style="text-align: center; margin-top: 20px; font-size: 0.82rem; color: var(--text-muted);">
+      <a href="index.html" style="color: var(--text-secondary);">← Back to Overview</a>
+    </div>
+
+  </main>
+
+  <script src="static/js/app.js"></script>
+  <script>
+    function toggleAuthMode(mode) {
+      const loginBtn = document.getElementById('tab-login-btn');
+      const signupBtn = document.getElementById('tab-signup-btn');
+      const heading = document.getElementById('login-heading');
+      const submitBtn = document.getElementById('submit-auth-btn');
+
+      if (mode === 'signup') {
+        signupBtn.className = 'btn btn-white btn-sm';
+        signupBtn.style.border = '1px solid #ffffff';
+        loginBtn.className = 'btn btn-secondary btn-sm';
+        loginBtn.style.border = 'none';
+        heading.textContent = 'Create BrandVerify Account';
+        submitBtn.textContent = 'Sign Up & Continue';
+        AuthUI.currentTab = 'signup';
+      } else {
+        loginBtn.className = 'btn btn-white btn-sm';
+        loginBtn.style.border = '1px solid #ffffff';
+        signupBtn.className = 'btn btn-secondary btn-sm';
+        signupBtn.style.border = 'none';
+        heading.textContent = 'Log In to BrandVerify';
+        submitBtn.textContent = 'Log In';
+        AuthUI.currentTab = 'login';
+      }
+    }
+  </script>
+</body>
+</html>

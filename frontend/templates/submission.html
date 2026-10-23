@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Content Submission | BrandVerify</title>
+  <meta name="description" content="Submit content for automated pre-flight brand compliance, claim verification, and color harmony analysis.">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <link rel="stylesheet" href="static/css/styles.css">
+</head>
+<body>
+
+
+  <!-- Top Floating Glass Navbar -->
+  <header class="navbar">
+    <!-- BrandVerify Logo (No space, no circular badge) -->
+    <a href="index.html" class="nav-brand" title="BrandVerify Home">
+      <img src="static/images/BrandVerify.svg" alt="BrandVerify" class="brand-logo-img">
+    </a>
+
+    <!-- Top Center Tabs: Overview, Dashboard, Compliance Checker -->
+    <nav class="nav-links-center">
+      <a href="index.html" class="nav-tab-link">Overview</a>
+      <a href="dashboard.html" class="nav-tab-link">Dashboard</a>
+      <a href="brand.html" class="nav-tab-link active">Compliance Checker</a>
+    </nav>
+
+    <!-- Top Right Actions -->
+    <div class="nav-actions">
+      <!-- Guest State: ONLY Log In -->
+      <div id="nav-guest-actions" style="display: flex; align-items: center; gap: 10px;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="AuthUI.openSignInModal('login')">
+          Log In
+        </button>
+      </div>
+
+      <!-- Logged-In State: Newspaper B&W PFP with dropdown -->
+      <div id="nav-user-profile" style="display: none; align-items: center; gap: 10px; position: relative;">
+        <div class="user-pfp-wrapper" onclick="AuthUI.togglePfpMenu(event)" title="User Profile">
+          <img src="static/images/avatar_newspaper.jpg" alt="User Avatar" class="newspaper-pfp" id="nav-pfp-img">
+        </div>
+
+        <div class="pfp-dropdown-menu" id="pfp-dropdown-menu">
+          <div class="pfp-dropdown-header">
+            <img src="static/images/avatar_newspaper.jpg" alt="User Profile" class="newspaper-pfp-sm">
+            <div>
+              <div class="pfp-dropdown-name">Alex Vance</div>
+              <div class="pfp-dropdown-email" id="nav-user-email">alex@brandverify.ai</div>
+            </div>
+          </div>
+          <a href="dashboard.html" class="pfp-dropdown-item">Managed Brands</a>
+          <a href="brand.html" class="pfp-dropdown-item">Compliance Workspace</a>
+          <div class="pfp-dropdown-divider"></div>
+          <button type="button" class="pfp-dropdown-item text-danger" onclick="AuthUI.signOut()">Log Out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container" style="max-width: 960px;">
+
+    <!-- Breadcrumb & Header -->
+    <div style="margin-bottom: 24px;">
+      <h1 style="font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 6px;">
+        Submit Content for Pre-Flight Scan
+      </h1>
+      <p style="color: var(--text-secondary);">Upload text copy, visual brand assets, or video commercials for real-time compliance evaluation.</p>
+    </div>
+
+    <!-- Active Brand Profile Bar -->
+    <div class="card" style="margin-bottom: 24px; padding: 18px 24px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); font-weight: 700;">
+            Enforcing Brand Profile
+          </div>
+          <div style="font-size: 1.15rem; font-weight: 800; color: #fff; margin-top: 2px;" id="active-brand-name">
+            Acme Global Technologies
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="text-align: right;">
+            <div style="font-size: 0.72rem; color: var(--text-muted);">Active Rulebook</div>
+            <div style="font-size: 0.88rem; font-weight: 600; color: #cbd5e1;" id="active-rulebook-name">
+              FTC Tech & Cloud Performance Claims v3.2
+            </div>
+          </div>
+          <a href="dashboard.html" class="btn btn-secondary btn-sm" style="font-size: 0.78rem;">
+            Change
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Submission Form -->
+    <form id="asset-submission-form" onsubmit="event.preventDefault(); Toast.show('Pre-flight scan started. Redirecting to review...', 'info'); setTimeout(() => { window.location.href = 'review.html'; }, 600);">
+      
+      <!-- Section 1: Campaign Info -->
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+          <h3 class="card-title">Campaign Details</h3>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div class="form-group">
+            <label class="form-label" for="campaign-name">Campaign Title</label>
+            <input type="text" id="campaign-name" class="form-control" value="Q4 Product Launch - CloudScale Engine" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="target-channel">Target Channel</label>
+            <select id="target-channel" class="form-select">
+              <option value="social">Social Media (LinkedIn, Twitter/X, Instagram)</option>
+              <option value="billboard">Billboard / Print Media</option>
+              <option value="commercial">Commercial Video Broadcast</option>
+              <option value="press">Press Release</option>
+              <option value="other">Other Channel / Custom Target</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Asset Payload -->
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+          <h3 class="card-title">Ad Copy / Text Content</h3>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="text-payload">Marketing Copy for Substantiation Scan</label>
+          <textarea id="text-payload" class="form-textarea" rows="4" placeholder="Enter headline, body copy, and taglines...">BrandVerify CloudScale engine is guaranteed to be 10X faster than any competitor on the market with zero downtime. Upgrade today to eliminate all latency across your multi-tenant asset pipeline.</textarea>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label">Attach Accompanying Assets (Image, Video, Audio or PDF)</label>
+          <div class="dropzone" onclick="document.getElementById('file-upload-input').click()">
+            <input type="file" id="file-upload-input" style="display: none;" onchange="Toast.show(`Attached ${this.files[0]?.name}`, 'success')">
+            <div style="font-size: 1.8rem; margin-bottom: 8px;">📁</div>
+            <div style="font-weight: 700; color: #fff; margin-bottom: 4px;">Click to select file or drag & drop</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Supports PNG, JPG, MP4, MOV, MP3, PDF, DOCX (Max 250MB)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Submit Action Bar -->
+      <div style="display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 40px;">
+        <a href="dashboard.html" class="btn btn-secondary">
+          Cancel
+        </a>
+        <button type="submit" class="btn btn-white">
+          Run Pre-Flight Scan →
+        </button>
+      </div>
+
+    </form>
+
+  </main>
+
+  <script src="static/js/app.js"></script>
+</body>
+</html>
