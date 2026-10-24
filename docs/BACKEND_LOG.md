@@ -294,3 +294,13 @@ Step 21 DONE: approve/reject decisions with a permanent audit log
     responses now include a review_status field.
   - Undo: git revert <commit "Add approve/reject decisions with a
     permanent audit log">. The audit_log table stays in the database file.
+
+Step 22 DONE: PDF audit report generator (WeasyPrint)
+Why: human reviewers and legal teams need downloadable, immutable PDF audit 
+     trails for compliance and archiving.
+New service (backend/services/pdf_report.py):
+     Uses WeasyPrint to dynamically build PDF documents containing scan metadata, 
+     flagged findings, and full immutable audit history.
+New endpoint (backend/api/scans.py):
+     GET /api/v1/scans/{scan_id}/report.pdf - returns application/pdf file.
+Dependencies: WeasyPrint (Python) + system Pango libraries (libpango-1.0-0, libpangoft2-1.0-0).
