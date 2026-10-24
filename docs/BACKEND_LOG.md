@@ -112,3 +112,6 @@ Step 15 DONE: shared status rule
   - Open question for the team: should critical flags give "non_compliant"?
     The ScanResult model comments list that status but nothing produces it.
   - Undo: git revert <commit "Use one shared overall-status rule...">
+
+Step 15 CONFIRMED: 18 tests pass.
+  - Undo for step 15: git revert c356703
