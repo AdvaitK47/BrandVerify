@@ -10,14 +10,19 @@ from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from fastapi.concurrency import run_in_threadpool
 from typing import Optional
 import logging
+import os
+import tempfile
 import uuid
+from pathlib import Path
 
+from backend.config import settings
 from backend.db import save_scan
 from backend.models.scan import ScanRequest, ScanResult
 from backend.services.text_verifier import verify_text_compliance
 from backend.services.ai_explainer import explain_findings
 from backend.services.image_verifier import verify_image_compliance
-from backend.services.doc_verifier import verify_document_compliance
+from backend.services.doc_extractor import SUPPORTED_EXTENSIONS, DocumentError
+from backend.services.doc_verifier import verify_document
 from backend.services.audio_verifier import verify_audio_compliance
 from backend.services.video_verifier import verify_video_compliance
 
@@ -120,14 +125,17 @@ async def verify_file_upload(
 ):
     """Upload and verify binary creative assets."""
 
+    if content_type == "document":
+        return await _verify_document_upload(
+            brand_id, title, target_channel, custom_rule, file
+        )
+
     if content_type == "image":
         flags = verify_image_compliance(
             file.filename,
             ["#ffffff", "#a1a1aa", "#121214"],
             custom_rule,
         )
-    elif content_type == "document":
-        flags = verify_document_compliance(file.filename, custom_rule)
     elif content_type == "audio":
         flags = verify_audio_compliance(file.filename, custom_rule)
     elif content_type == "video":
@@ -151,3 +159,75 @@ async def verify_file_upload(
         "compliance_score": score,
         "flags": flags,
     }
+
+
+async def _verify_document_upload(
+    brand_id: str,
+    title: str,
+    target_channel: str,
+    custom_rule: Optional[str],
+    file: UploadFile,
+) -> ScanResult:
+    """Validate, read and scan an uploaded .pdf/.docx, then save the result."""
+
+    extension = Path(file.filename or "").suffix.lower()
+    if extension not in SUPPORTED_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Unsupported document type '{extension or 'unknown'}'. "
+                f"Supported: {', '.join(sorted(SUPPORTED_EXTENSIONS))}."
+            ),
+        )
+
+    max_bytes = settings.MAX_UPLOAD_MB * 1024 * 1024
+    tmp_path = None
+
+    try:
+        # Stream to a temp file so a huge upload is never held fully in memory.
+        with tempfile.NamedTemporaryFile(suffix=extension, delete=False) as tmp:
+            tmp_path = tmp.name
+            size = 0
+            while True:
+                chunk = await file.read(1024 * 1024)
+                if not chunk:
+                    break
+                size += len(chunk)
+                if size > max_bytes:
+                    raise HTTPException(
+                        status_code=413,
+                        detail=f"File is larger than {settings.MAX_UPLOAD_MB} MB.",
+                    )
+                tmp.write(chunk)
+
+        try:
+            scan = await run_in_threadpool(
+                verify_document, tmp_path, custom_rule, file.filename
+            )
+        except DocumentError as exc:
+            raise HTTPException(status_code=422, detail=str(exc))
+    finally:
+        if tmp_path and os.path.exists(tmp_path):
+            os.unlink(tmp_path)
+
+    explanation = await run_in_threadpool(explain_findings, scan.text, scan.flags)
+
+    result = ScanResult(
+        scan_id=f"scan-{uuid.uuid4().hex[:8]}",
+        brand_id=brand_id,
+        content_type="document",
+        title=title,
+        target_channel=target_channel,
+        overall_status=determine_overall_status(scan.flags),
+        compliance_score=calculate_compliance_score(scan.flags),
+        flags=scan.flags,
+        ai_explanation=explanation,
+        diff=None,
+    )
+
+    try:
+        await run_in_threadpool(save_scan, result)
+    except Exception:
+        logger.exception("Could not save scan %s", result.scan_id)
+
+    return result

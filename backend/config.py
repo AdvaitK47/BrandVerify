@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     DELTA_E_THRESHOLD: float = 2.5  # CIE2000 acceptable brand color tolerance
     MIN_LOGO_MARGIN_PX: int = 32     # Minimum required exclusion margin
     MAX_SPEECH_WPM: int = 160        # Max comfortable spoken words per minute
+    MAX_UPLOAD_MB: int = 25          # Largest accepted upload
 
     class Config:
         env_file = ".env"
