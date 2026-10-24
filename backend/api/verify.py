@@ -7,9 +7,12 @@ AI explains those findings but does not decide the score.
 """
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
+from fastapi.concurrency import run_in_threadpool
 from typing import Optional
+import logging
 import uuid
 
+from backend.db import save_scan
 from backend.models.scan import ScanRequest, ScanResult
 from backend.services.text_verifier import verify_text_compliance
 from backend.services.ai_explainer import explain_findings
@@ -19,6 +22,7 @@ from backend.services.audio_verifier import verify_audio_compliance
 from backend.services.video_verifier import verify_video_compliance
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 def calculate_compliance_score(flags) -> int:
@@ -71,7 +75,7 @@ async def verify_text_endpoint(payload: ScanRequest):
         diff_result.flags,
     )
 
-    return ScanResult(
+    result = ScanResult(
         scan_id=f"scan-{uuid.uuid4().hex[:8]}",
         brand_id=payload.brand_id,
         content_type="text",
@@ -91,6 +95,13 @@ async def verify_text_endpoint(payload: ScanRequest):
         ai_explanation=ai_explanation,
         diff=diff_result,
     )
+
+    try:
+        await run_in_threadpool(save_scan, result)
+    except Exception:
+        logger.exception("Could not save scan %s", result.scan_id)
+
+    return result
 
 
 @router.post("/upload")

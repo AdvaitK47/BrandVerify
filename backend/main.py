@@ -3,6 +3,8 @@ BrandVerify Main Application Entrypoint
 FastAPI server providing RESTful endpoints, static frontend mounting, and compliance engine routes.
 """
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -11,11 +13,19 @@ import os
 
 from backend.config import settings
 from backend.api import api_router
+from backend.db import init_db
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
+
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
-    description="Intelligent Pre-Flight Brand Governance & Multi-Modal Compliance Engine."
+    description="Intelligent Pre-Flight Brand Governance & Multi-Modal Compliance Engine.",
+    lifespan=lifespan,
 )
 
 # CORS Middleware

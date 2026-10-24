@@ -49,3 +49,13 @@ class ScanResult(BaseModel):
     ai_explanation: Optional[str] = None
     diff: Optional[ScanDiffItem] = None
     scanned_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class ScanSummary(BaseModel):
+    scan_id: str
+    brand_id: str
+    title: Optional[str] = None
+    content_type: Optional[str] = None
+    overall_status: Optional[str] = None
+    compliance_score: int
+    scanned_at: datetime
