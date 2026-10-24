@@ -53,6 +53,19 @@ def calculate_compliance_score(flags) -> int:
     return max(0, min(100, 100 - total_deduction))
 
 
+def determine_overall_status(flags) -> str:
+    """
+    One rule for every endpoint: "warnings_detected" if any flag is more
+    serious than info, otherwise "compliant".
+    """
+    for flag in flags:
+        severity = getattr(flag, "severity", "info")
+        severity = getattr(severity, "value", severity)
+        if str(severity).lower() not in ("info", "informational"):
+            return "warnings_detected"
+    return "compliant"
+
+
 @router.post("/text", response_model=ScanResult)
 async def verify_text_endpoint(payload: ScanRequest):
     """Scan text with deterministic rules and explain findings with AI."""
@@ -81,15 +94,7 @@ async def verify_text_endpoint(payload: ScanRequest):
         content_type="text",
         title=payload.title,
         target_channel=payload.target_channel,
-        overall_status=(
-    "warnings_detected"
-    if any(
-        str(getattr(flag.severity, "value", flag.severity)).lower()
-        != "info"
-        for flag in diff_result.flags
-    )
-    else "compliant"
-),
+        overall_status=determine_overall_status(diff_result.flags),
         compliance_score=score,
         flags=diff_result.flags,
         ai_explanation=ai_explanation,
@@ -142,9 +147,7 @@ async def verify_file_upload(
         "filename": file.filename,
         "title": title,
         "target_channel": target_channel,
-        "overall_status": (
-            "warnings_detected" if flags else "compliant"
-        ),
+        "overall_status": determine_overall_status(flags),
         "compliance_score": score,
         "flags": flags,
     }
