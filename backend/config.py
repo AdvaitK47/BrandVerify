@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: Optional[str] = os.getenv("OPENAI_API_KEY", None)
     ANTHROPIC_API_KEY: Optional[str] = os.getenv("ANTHROPIC_API_KEY", None)
     GEMINI_API_KEY: Optional[str] = os.getenv("GEMINI_API_KEY", None)
+    GROQ_API_KEY: Optional[str] = None
 
     # Verification Engine Settings
     DELTA_E_THRESHOLD: float = 2.5  # CIE2000 acceptable brand color tolerance

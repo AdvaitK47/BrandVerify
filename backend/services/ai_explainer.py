@@ -1,8 +1,11 @@
 
 """AI explanations for deterministic BrandVerify compliance findings."""
 
-import os
-from groq import Groq
+import logging
+
+from backend.config import settings
+
+logger = logging.getLogger(__name__)
 
 
 MODEL_NAME = "qwen/qwen3.8-27b"
@@ -17,7 +20,7 @@ def explain_findings(raw_text: str, flags: list) -> str:
             "This does not guarantee that the content is fully compliant."
         )
 
-    api_key = os.getenv("GROQ_API_KEY")
+    api_key = settings.GROQ_API_KEY
     if not api_key:
         return (
             "AI explanation is unavailable because GROQ_API_KEY is not set. "
@@ -74,6 +77,14 @@ as informational. Do not describe it as an additional violation.
 """
 
     try:
+        from groq import Groq
+    except ImportError:
+        return (
+            "AI explanation is unavailable because the groq package "
+            "is not installed. The rule-based findings are still available."
+        )
+
+    try:
         client = Groq(api_key=api_key, timeout=20.0)
 
         response = client.chat.completions.create(
@@ -105,6 +116,7 @@ as informational. Do not describe it as an additional violation.
         )
 
     except Exception:
+        logger.exception("Groq explanation failed")
         # Keep the rule-based scan available if the AI service fails.
         return (
             "AI explanation could not be generated. "
