@@ -235,3 +235,30 @@ Step 19 DONE: per-brand rules from files
   - Rule files: edit the JSON; run the tests afterwards, they validate
     every file and compile every pattern.
   - Undo: git revert the per-brand rules commits.
+
+Step 20 DONE: PII masking before the AI call
+  - Why: explain_findings() sent the ad copy and the findings to Groq (a
+    hosted service) unmasked, which contradicted the submission's privacy
+    promise.
+  - New: backend/services/pii_masker.py (PiiMasker). Replaces email
+    addresses, phone numbers, card numbers (any 13-19 digits), US SSNs,
+    Indian PAN and Aadhaar-style IDs with tags like [EMAIL_1]. The real
+    values stay on the server and are put back into the AI's answer
+    locally.
+  - Edited: backend/services/ai_explainer.py. The masking sits inside
+    explain_findings(), the only place text leaves for the network, so
+    text, document and any future scan type are covered. The ad copy,
+    finding titles, descriptions, snippets, fixes and citations are all
+    masked.
+  - New tests: test_pii_masker.py (17) and test_ai_privacy.py (3). A fake
+    AI service records what it receives; the tests check no email/phone
+    is in it, the answer is restored, and a clean scan makes no AI call.
+    Total: 83 passed.
+  - NOT DONE (be honest in the demo/submission): people's names, places
+    and codenames are NOT masked. Microsoft Presidio (named in the
+    submission) needs a spaCy model and is a later step. Either add
+    Presidio, or word the submission as "emails, phone numbers and IDs".
+  - Other limits: pattern-based, so unusual formats can be missed; the AI
+    is still a hosted Groq model, not a local Llama/Mistral as the
+    submission describes.
+  - Undo: git revert <commit "Mask personal details before text is sent...">
