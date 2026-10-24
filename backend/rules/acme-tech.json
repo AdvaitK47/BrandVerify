@@ -1,0 +1,49 @@
+{
+  "name": "Acme Global Technologies: cloud and performance claims",
+  "claims": [
+    {
+      "id": "10x-faster",
+      "pattern": "\\b10[Xx]\\s+faster\\b",
+      "title": "Specific comparative performance claim needs substantiation",
+      "fix": "Describe the measured performance improvement, with verified evidence",
+      "severity": "warning"
+    },
+    {
+      "id": "zero-downtime",
+      "pattern": "\\bzero\\s+downtime\\b",
+      "title": "Absolute uptime claim needs substantiation",
+      "fix": "Describe verified uptime performance and applicable service terms",
+      "severity": "critical"
+    },
+    {
+      "id": "eliminate-all-latency",
+      "pattern": "\\beliminate\\s+all\\s+latency\\b",
+      "title": "Absolute latency claim needs substantiation",
+      "fix": "Describe measured latency improvements, with verified evidence",
+      "severity": "warning"
+    },
+    {
+      "id": "guaranteed",
+      "pattern": "\\bguaranteed\\b",
+      "title": "Guarantee language may need supporting terms and evidence",
+      "fix": "Specify the actual guarantee terms, if one exists",
+      "severity": "warning"
+    }
+  ],
+  "disclaimers": [
+    {
+      "id": "forward-looking",
+      "title": "Missing Forward-Looking Statements Disclaimer",
+      "trigger": "\\b(we\\s+expect|we\\s+anticipate|we\\s+project|projected|forecasts?|expected\\s+to\\s+(?:grow|reach|increase|deliver)|will\\s+(?:grow|increase|reach|double|triple))\\b",
+      "accepted": "forward[-\\s]looking",
+      "fix": "Add a forward-looking statements disclaimer, using wording approved by your legal or compliance team."
+    },
+    {
+      "id": "past-performance",
+      "title": "Missing Past Performance Disclaimer",
+      "trigger": "\\b(annual(?:ized)?\\s+returns?|expected\\s+returns?|investment\\s+returns?|returns?\\s+of\\s+\\d|\\broi\\b)",
+      "accepted": "past\\s+performance|results\\s+may\\s+vary",
+      "fix": "Add a past performance disclaimer, using wording approved by your legal or compliance team."
+    }
+  ]
+}

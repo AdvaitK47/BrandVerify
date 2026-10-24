@@ -1,0 +1,35 @@
+{
+  "name": "Pulse BioHealth: health claims",
+  "claims": [
+    {
+      "id": "cures",
+      "pattern": "\\b(cures?|heals?)\\b",
+      "title": "Disease treatment claim needs substantiation",
+      "fix": "Remove disease claims, or limit the wording to what your compliance team has approved",
+      "severity": "critical"
+    },
+    {
+      "id": "clinically-proven",
+      "pattern": "\\bclinically\\s+(proven|tested)\\b",
+      "title": "Clinical evidence claim needs substantiation",
+      "fix": "Reference the specific study, or remove the claim",
+      "severity": "warning"
+    },
+    {
+      "id": "fully-safe",
+      "pattern": "\\b100\\s*%\\s+safe\\b",
+      "title": "Absolute safety claim needs substantiation",
+      "fix": "Describe the verified safety information, or remove the claim",
+      "severity": "critical"
+    }
+  ],
+  "disclaimers": [
+    {
+      "id": "dietary-supplement",
+      "title": "Missing Dietary Supplement Disclaimer",
+      "trigger": "\\b(supports?|boosts?|promotes?)\\s+(immune|immunity|heart|joint|brain|digestive)\\b",
+      "accepted": "not\\s+been\\s+evaluated\\s+by\\s+the\\s+(food\\s+and\\s+drug\\s+administration|fda)",
+      "fix": "Add the required dietary supplement disclaimer, using wording approved by your legal or compliance team."
+    }
+  ]
+}

@@ -2,8 +2,9 @@
 Required-disclaimer check for documents.
 
 Some kinds of statements normally need a standard disclaimer nearby, for
-example forward-looking statements or investment returns. Each rule below
-has a TRIGGER (language that makes the disclaimer expected) and an ACCEPTED
+example forward-looking statements or investment returns. Each brand's rule
+file (backend/rules/<brand_id>.json) lists disclaimer rules. A rule has a
+TRIGGER (language that makes the disclaimer expected) and an ACCEPTED
 pattern (wording that counts as the disclaimer being present). If the
 trigger is found and no accepted wording appears anywhere in the document
 (body, tables, headers or footers), a flag is raised.
@@ -12,58 +13,24 @@ These are heuristic checks for human review, not legal determinations.
 """
 
 import re
-from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
 from backend.models.scan import ComplianceFlag, SeverityLevel
+from backend.services.brand_rules import load_rules
+from backend.services.rule_models import RuleSet
 
 
-@dataclass(frozen=True)
-class DisclaimerRule:
-    key: str
-    title: str
-    trigger: str      # regex: language that makes the disclaimer expected
-    accepted: str     # regex: wording that counts as the disclaimer
-    fix: str
-
-
-DISCLAIMER_RULES = [
-    DisclaimerRule(
-        key="forward-looking",
-        title="Missing Forward-Looking Statements Disclaimer",
-        trigger=(
-            r"\b(we\s+expect|we\s+anticipate|we\s+project|projected|"
-            r"forecasts?|expected\s+to\s+(?:grow|reach|increase|deliver)|"
-            r"will\s+(?:grow|increase|reach|double|triple))\b"
-        ),
-        accepted=r"forward[-\s]looking",
-        fix=(
-            "Add a forward-looking statements disclaimer, using wording "
-            "approved by your legal or compliance team."
-        ),
-    ),
-    DisclaimerRule(
-        key="past-performance",
-        title="Missing Past Performance Disclaimer",
-        trigger=(
-            r"\b(annual(?:ized)?\s+returns?|expected\s+returns?|"
-            r"investment\s+returns?|returns?\s+of\s+\d|\broi\b)"
-        ),
-        accepted=r"past\s+performance|results\s+may\s+vary",
-        fix=(
-            "Add a past performance disclaimer, using wording approved "
-            "by your legal or compliance team."
-        ),
-    ),
-]
-
-
-def check_required_disclaimers(text: str) -> List[ComplianceFlag]:
+def check_required_disclaimers(
+    text: str, rules: Optional[RuleSet] = None
+) -> List[ComplianceFlag]:
     """Return one flag for each rule whose trigger is present but whose
-    disclaimer wording is absent."""
+    disclaimer wording is absent. Uses the default rules if none are given."""
+    if rules is None:
+        rules = load_rules(None)
+
     flags: List[ComplianceFlag] = []
 
-    for rule in DISCLAIMER_RULES:
+    for rule in rules.disclaimers:
         trigger = re.search(rule.trigger, text, re.IGNORECASE)
         if not trigger:
             continue
@@ -73,7 +40,7 @@ def check_required_disclaimers(text: str) -> List[ComplianceFlag]:
         phrase = trigger.group(0)
         flags.append(
             ComplianceFlag(
-                id=f"flag-disclaimer-{rule.key}",
+                id=f"flag-disclaimer-{rule.id}",
                 rule_citation=(
                     "BrandVerify heuristic disclaimer check; "
                     "human review may be needed"

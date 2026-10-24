@@ -1,0 +1,42 @@
+{
+  "name": "Apex Financial Partners: investment claims",
+  "claims": [
+    {
+      "id": "risk-free",
+      "pattern": "\\brisk[-\\s]free\\b",
+      "title": "Absolute risk claim needs substantiation",
+      "fix": "Describe the actual risks, using wording approved by your compliance team",
+      "severity": "critical"
+    },
+    {
+      "id": "guaranteed-returns",
+      "pattern": "\\bguaranteed\\s+(returns?|income|profits?|yield)\\b",
+      "title": "Guaranteed return language is high risk",
+      "fix": "Remove the guarantee, or state the exact contractual terms if one exists",
+      "severity": "critical"
+    },
+    {
+      "id": "beat-the-market",
+      "pattern": "\\b(beat|beats|outperform|outperforms)\\s+the\\s+market\\b",
+      "title": "Performance comparison claim needs substantiation",
+      "fix": "State the benchmark, period and verified results, or remove the claim",
+      "severity": "warning"
+    }
+  ],
+  "disclaimers": [
+    {
+      "id": "forward-looking",
+      "title": "Missing Forward-Looking Statements Disclaimer",
+      "trigger": "\\b(we\\s+expect|we\\s+anticipate|we\\s+project|projected|forecasts?|expected\\s+to\\s+(?:grow|reach|increase|deliver)|will\\s+(?:grow|increase|reach|double|triple))\\b",
+      "accepted": "forward[-\\s]looking",
+      "fix": "Add a forward-looking statements disclaimer, using wording approved by your legal or compliance team."
+    },
+    {
+      "id": "past-performance",
+      "title": "Missing Past Performance Disclaimer",
+      "trigger": "\\b(annual(?:ized)?\\s+returns?|expected\\s+returns?|investment\\s+returns?|returns?\\s+of\\s+\\d|\\broi\\b)",
+      "accepted": "past\\s+performance|results\\s+may\\s+vary",
+      "fix": "Add a past performance disclaimer, using wording approved by your legal or compliance team."
+    }
+  ]
+}

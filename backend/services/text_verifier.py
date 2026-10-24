@@ -10,45 +10,26 @@ import re
 from typing import List, Optional
 
 from backend.models.scan import ComplianceFlag, SeverityLevel, ScanDiffItem
-
-
-# Patterns identify claims that may need substantiation.
-# Suggested replacements deliberately avoid unsupported statistics.
-CLAIM_PATTERNS = [
-    (
-        r"\b10[Xx]\s+faster\b",
-        "Specific comparative performance claim needs substantiation",
-        "Describe the measured performance improvement, with verified evidence",
-    ),
-    (
-        r"\bzero\s+downtime\b",
-        "Absolute uptime claim needs substantiation",
-        "Describe verified uptime performance and applicable service terms",
-    ),
-    (
-        r"\beliminate\s+all\s+latency\b",
-        "Absolute latency claim needs substantiation",
-        "Describe measured latency improvements, with verified evidence",
-    ),
-    (
-        r"\bguaranteed\b",
-        "Guarantee language may need supporting terms and evidence",
-        "Specify the actual guarantee terms, if one exists",
-    ),
-]
+from backend.services.brand_rules import load_rules
+from backend.services.rule_models import RuleSet
 
 
 def verify_text_compliance(
     text: str,
     custom_rule: Optional[str] = None,
+    rules: Optional[RuleSet] = None,
 ) -> ScanDiffItem:
     """Flag possible issues and provide cautious, evidence-aware suggestions."""
+
+    if rules is None:
+        rules = load_rules(None)
 
     flags: List[ComplianceFlag] = []
     modified_text = text
 
     # Check potentially risky claims.
-    for idx, (pattern, title, fix) in enumerate(CLAIM_PATTERNS):
+    for idx, claim in enumerate(rules.claims):
+        pattern, title, fix = claim.pattern, claim.title, claim.fix
         match = re.search(pattern, text, re.IGNORECASE)
 
         if not match:
@@ -56,11 +37,7 @@ def verify_text_compliance(
 
         original_phrase = match.group(0)
 
-        severity = (
-            SeverityLevel.CRITICAL
-            if "zero" in original_phrase.lower()
-            else SeverityLevel.WARNING
-        )
+        severity = SeverityLevel(claim.severity)
 
         flags.append(
             ComplianceFlag(

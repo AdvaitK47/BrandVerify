@@ -18,6 +18,7 @@ from pathlib import Path
 from backend.config import settings
 from backend.db import save_scan
 from backend.models.scan import ScanRequest, ScanResult
+from backend.services.brand_rules import load_rules
 from backend.services.text_verifier import verify_text_compliance
 from backend.services.ai_explainer import explain_findings
 from backend.services.image_verifier import verify_image_compliance
@@ -84,6 +85,7 @@ async def verify_text_endpoint(payload: ScanRequest):
     diff_result = verify_text_compliance(
         payload.raw_text,
         payload.custom_rule,
+        load_rules(payload.brand_id),
     )
 
     score = calculate_compliance_score(diff_result.flags)
@@ -196,7 +198,7 @@ async def _verify_document_upload(
 
         try:
             scan = await run_in_threadpool(
-                verify_document, tmp_path, custom_rule, file.filename
+                verify_document, tmp_path, custom_rule, file.filename, brand_id
             )
         except DocumentError as exc:
             raise HTTPException(status_code=422, detail=str(exc))

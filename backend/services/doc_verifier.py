@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import List, Optional, Union
 
 from backend.models.scan import ComplianceFlag
+from backend.services.brand_rules import load_rules
 from backend.services.disclaimer_check import check_required_disclaimers
 from backend.services.doc_extractor import DocumentError, extract_document
 from backend.services.text_verifier import verify_text_compliance
@@ -26,6 +27,7 @@ def verify_document(
     file_path: Union[str, Path],
     custom_rule: Optional[str] = None,
     filename: Optional[str] = None,
+    brand_id: Optional[str] = None,
 ) -> DocumentScan:
     """Read a document and scan its text. Raises DocumentError if unreadable."""
     extracted = extract_document(file_path, filename)
@@ -36,8 +38,9 @@ def verify_document(
             "scanned documents (OCR) are not supported yet."
         )
 
-    diff = verify_text_compliance(extracted.text, custom_rule)
-    flags = diff.flags + check_required_disclaimers(extracted.text)
+    rules = load_rules(brand_id)
+    diff = verify_text_compliance(extracted.text, custom_rule, rules)
+    flags = diff.flags + check_required_disclaimers(extracted.text, rules)
     return DocumentScan(
         flags=flags,
         text=extracted.text,

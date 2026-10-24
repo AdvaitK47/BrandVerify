@@ -1,0 +1,34 @@
+{
+  "name": "Luxe & Co.: sustainability claims",
+  "claims": [
+    {
+      "id": "carbon-neutral",
+      "pattern": "\\bcarbon[-\\s]neutral\\b",
+      "title": "Climate neutrality claim needs substantiation",
+      "fix": "State what was measured and offset, with third-party verification, or remove the claim",
+      "severity": "warning"
+    },
+    {
+      "id": "eco-friendly",
+      "pattern": "\\b(eco[-\\s]friendly|environmentally\\s+friendly|green\\s+product)\\b",
+      "title": "Generic environmental claim needs substantiation",
+      "fix": "Replace with a specific, verifiable statement about the product",
+      "severity": "warning"
+    },
+    {
+      "id": "absolute-percent",
+      "pattern": "\\b100\\s*%\\s+(sustainable|organic|natural|recycled)\\b",
+      "title": "Absolute sustainability claim needs substantiation",
+      "fix": "State the verified share and how it was measured, or remove the claim",
+      "severity": "warning"
+    },
+    {
+      "id": "certified-organic",
+      "pattern": "\\bcertified\\s+organic\\b",
+      "title": "Certification claim needs a verifiable reference",
+      "fix": "Name the certifying body and certificate, or remove the claim",
+      "severity": "warning"
+    }
+  ],
+  "disclaimers": []
+}
