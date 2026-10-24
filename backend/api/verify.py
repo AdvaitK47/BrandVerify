@@ -88,9 +88,10 @@ async def verify_text_endpoint(payload: ScanRequest):
 
     score = calculate_compliance_score(diff_result.flags)
 
-    ai_explanation = explain_findings(
-        payload.raw_text,
-        diff_result.flags,
+    # The AI call is a slow network request. Run it in a worker thread so
+    # it cannot freeze the server while it waits.
+    ai_explanation = await run_in_threadpool(
+        explain_findings, payload.raw_text, diff_result.flags
     )
 
     result = ScanResult(
