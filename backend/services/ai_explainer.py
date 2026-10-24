@@ -4,6 +4,7 @@
 import logging
 
 from backend.config import settings
+from backend.services.pii_masker import PiiMasker
 
 logger = logging.getLogger(__name__)
 
@@ -27,18 +28,23 @@ def explain_findings(raw_text: str, flags: list) -> str:
             "The rule-based findings are still available."
         )
 
+    # Everything below is sent to an external AI service, so personal details
+    # are masked first and restored locally in the answer.
+    masker = PiiMasker()
+    safe_text = masker.mask(raw_text[:20000])[:5000]
+
     findings = [
         {
-            "title": flag.title,
+            "title": masker.mask(flag.title),
             "severity": str(
                 flag.severity.value
                 if hasattr(flag.severity, "value")
                 else flag.severity
             ),
-            "description": flag.description,
-            "original_snippet": flag.original_snippet,
-            "recommended_fix": flag.recommended_fix,
-            "rule_citation": flag.rule_citation,
+            "description": masker.mask(flag.description),
+            "original_snippet": masker.mask(flag.original_snippet),
+            "recommended_fix": masker.mask(flag.recommended_fix),
+            "rule_citation": masker.mask(flag.rule_citation),
         }
         for flag in flags
     ]
@@ -62,7 +68,7 @@ IMPORTANT RULES:
 - Use clear, concise, professional language.
 
 AD COPY:
-{raw_text[:5000]}
+{safe_text}
 
 EXISTING RULE-BASED FINDINGS:
 {findings}
@@ -108,7 +114,7 @@ as informational. Do not describe it as an additional violation.
         explanation = response.choices[0].message.content
 
         if explanation and explanation.strip():
-            return explanation.strip()
+            return masker.unmask(explanation.strip())
 
         return (
             "AI returned no explanation. "
