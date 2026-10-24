@@ -174,3 +174,22 @@ Step 16C DONE: required-disclaimer check for documents
     checks the whole document, not whether the disclaimer sits near the
     claim; documents only, text scans do not run this check.
   - Undo: git revert <commit "Check uploaded documents for required disclaimers">
+
+Step 17 DONE: simulated image/audio/video results are labelled, not saved
+  - Why: image_verifier, audio_verifier and video_verifier do not analyse
+    the file. They return fixed demo findings (the image one returned
+    nothing, so every image looked "compliant" with 100).
+  - Edited: backend/api/verify.py. Upload for image/audio/video now returns
+    _simulated_response(): overall_status "simulated", compliance_score
+    null, scan_id null, simulated true, saved false, a plain-language
+    notice, and "[SIMULATED]" prefixed on every flag title.
+    Never saved to history. Document and text scans are unchanged.
+  - New: backend/tests/test_api_simulated.py (7 tests). Total: 45 passed.
+  - Updated: backend/tests/test_status.py (old audio test expected
+    "compliant"; now expects "simulated").
+  - FRONTEND TODO (teammate): for content_type image/audio/video the
+    response now has compliance_score = null and scan_id = null. Show the
+    notice and a "Simulated" badge instead of a score, and do not link to
+    a saved scan.
+  - Real image/audio/video checks stay PARKED.
+  - Undo: git revert <commit "Label simulated image/audio/video results...">
