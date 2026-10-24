@@ -157,3 +157,20 @@ Step 16B DONE: document upload scanning
     yet". Endpoint: POST /api/v1/verify/upload (multipart form: brand_id,
     content_type=document, title, target_channel, custom_rule, file).
   - Undo: git revert <commit "Scan uploaded DOCX/PDF documents...">
+
+Step 16C DONE: required-disclaimer check for documents
+  - New: backend/services/disclaimer_check.py. Each rule has a trigger
+    pattern and an accepted-wording pattern; if the trigger is found and
+    the wording is missing anywhere in the document (body, tables, headers,
+    footers), a "missing_disclaimer" WARNING flag is raised.
+  - Rules so far: forward-looking statements; past performance / results
+    may vary (for investment-return language).
+  - Edited: backend/services/doc_verifier.py (adds the disclaimer flags
+    after the claim-rule flags).
+  - New: backend/tests/test_disclaimer_check.py (6 tests) and
+    backend/tests/test_api_disclaimers.py (3 tests). Total: 38 passed.
+  - Limits: heuristic keyword rules, not legal determinations; the same
+    two rules apply to every brand until per-brand rules (later step);
+    checks the whole document, not whether the disclaimer sits near the
+    claim; documents only, text scans do not run this check.
+  - Undo: git revert <commit "Check uploaded documents for required disclaimers">
