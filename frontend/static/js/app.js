@@ -341,25 +341,70 @@ const BrandManager = {
     }
   },
 
-  handleRulebookFiles(e) {
-    const files = e.target.files;
+
+  async handleRulebookFiles(e) {
+    const files = Array.from(e.target.files || []);
     if (!files.length) return;
 
     const list = document.getElementById('rulebook-items-list');
-    if (list) {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const item = document.createElement('div');
-        item.style.cssText = 'display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:rgba(255,255,255,0.03); border-radius:6px; border:1px solid rgba(255,255,255,0.08);';
-        item.innerHTML = `
-          <span>📁 <strong>${file.name}</strong> (${(file.size / 1024).toFixed(1)} KB) — <em style="color:var(--text-muted);font-size:0.8rem;">Indexed</em></span>
-          <span class="badge badge-brand">Active</span>
-        `;
-        list.prepend(item);
+    const brandId = this.currentBrandId || 'acme-tech';
+
+    for (const file of files) {
+      if (!file.name.toLowerCase().endsWith('.pdf')) {
+        Toast.show(`${file.name}: Please upload a PDF file.`, 'error');
+        continue;
+      }
+
+      try {
+        Toast.show(`Uploading ${file.name}...`, 'info');
+
+        const formData = new FormData();
+        formData.append('brand_id', brandId);
+        formData.append('file', file);
+
+        const response = await fetch('/api/v1/verify/rulebook', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.detail || `HTTP ${response.status}`);
+        }
+
+        if (list) {
+          const item = document.createElement('div');
+          item.style.cssText =
+            'display:flex;align-items:center;justify-content:space-between;' +
+            'gap:12px;padding:10px 14px;margin-bottom:8px;' +
+            'background:rgba(255,255,255,0.03);border-radius:6px;' +
+            'border:1px solid rgba(255,255,255,0.08);';
+
+          const name = document.createElement('span');
+          name.textContent =
+            `📄 ${result.filename} — ${result.character_count} characters extracted`;
+
+          const badge = document.createElement('span');
+          badge.className = 'badge badge-brand';
+          badge.textContent = 'Indexed';
+
+          item.append(name, badge);
+          list.prepend(item);
+        }
+
+        Toast.show(`${file.name} uploaded and processed!`, 'success');
+        console.log('Rulebook upload result:', result);
+
+      } catch (error) {
+        console.error('Rulebook upload failed:', error);
+        Toast.show(`Upload failed: ${error.message}`, 'error');
       }
     }
-    Toast.show(`${files.length} guideline asset(s) uploaded and indexed!`, 'success');
+
+    e.target.value = '';
   },
+
 
 
 
