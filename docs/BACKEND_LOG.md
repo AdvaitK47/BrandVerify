@@ -208,3 +208,30 @@ Step 18 DONE: AI call no longer blocks the server
     still runs inline. The AI call keeps its 20 s timeout and its fallback
     messages.
   - Undo: git revert <commit "Run the AI explanation call in a worker thread...">
+
+Step 19 DONE: per-brand rules from files
+  - Why: scans ignored brand_id. Every brand got the same hard-coded 4
+    claim patterns and 2 disclaimer rules.
+  - New: backend/rules/<brand_id>.json (default, acme-tech, luxe-fashion,
+    apex-fin, pulse-health). Each file has "claims" (pattern, title, fix,
+    severity) and "disclaimers" (trigger, accepted wording, title, fix).
+    default.json equals the old hard-coded rules, so unknown brands
+    behave exactly as before.
+  - New: backend/services/brand_rules.py (load_rules, load_all_rule_files,
+    RuleFileError) and backend/services/rule_models.py. brand_id is only a
+    lookup key into existing files, never part of a file path. Files are
+    read on every scan, so rule edits apply without a restart. A broken
+    rule file raises RuleFileError (the scan fails loudly instead of
+    using wrong rules).
+  - Edited: text_verifier.py, disclaimer_check.py, doc_verifier.py,
+    api/verify.py (rules chosen by brand_id).
+  - New tests: test_brand_rules.py (12) and test_api_brand_rules.py (4).
+    Total: 63 passed.
+  - Limits: rules are heuristic keyword checks for human review, not
+    legal advice; compliance should review the wording before real use.
+    Disclaimer rules run on documents only, not on text scans. The brand
+    rulebook summaries on the brand page still describe checks that do not
+    exist yet (frontend text, teammate TODO).
+  - Rule files: edit the JSON; run the tests afterwards, they validate
+    every file and compile every pattern.
+  - Undo: git revert the per-brand rules commits.
