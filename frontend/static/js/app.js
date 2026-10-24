@@ -361,26 +361,227 @@ const BrandManager = {
     Toast.show(`${files.length} guideline asset(s) uploaded and indexed!`, 'success');
   },
 
-  runCheck(e, type) {
-    if (e) e.preventDefault();
-    const form = e.target;
-    const customRuleInput = form.querySelector('.custom-rule-input');
-    const customRule = customRuleInput ? customRuleInput.value.trim() : '';
 
-    const scanMsg = customRule 
-      ? `Scanning ${type} with specific rule: "${customRule.substring(0, 40)}..."` 
-      : `Running pre-flight governance scan on ${type}...`;
-    Toast.show(scanMsg, 'info');
 
-    setTimeout(() => {
-      Toast.show(`Pre-flight scan completed! Diff comparison updated in Recent section.`, 'success');
-      this.showMainSection('recent');
-      const diffSection = document.getElementById('original-copy-pane');
-      if (diffSection) {
-        diffSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+async runCheck(e, type) {
+  if (e) e.preventDefault();
+
+  const form = e.currentTarget || e.target;
+
+  // Keep the other checker tabs unchanged for now.
+  if (type !== 'Text Copy') {
+    Toast.show(
+      `${type} checker integration is not connected yet.`,
+      'info'
+    );
+    return;
+  }
+
+  const title = form.querySelector('input[type="text"]')?.value.trim() || '';
+  const targetChannel = form.querySelector('select')?.value || '';
+  const customRule = form.querySelector('.custom-rule-input')?.value.trim() || '';
+  const rawText = form.querySelector('textarea.form-textarea')?.value.trim() || '';
+
+  if (!title || !rawText) {
+    Toast.show('Enter a title and text to scan.', 'error');
+    return;
+  }
+
+  const button = form.querySelector('button[type="submit"]');
+  const oldButtonText = button?.textContent || '';
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = 'Scanning...';
+  }
+
+  Toast.show('Running compliance scan...', 'info');
+
+  try {
+    const response = await fetch('/api/v1/verify/text', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        brand_id: this.currentBrandId || 'acme-tech',
+        content_type: 'text',
+        title,
+        target_channel: targetChannel,
+        custom_rule: customRule || null,
+        raw_text: rawText
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.detail || `HTTP ${response.status}`);
+    }
+
+    // Update the original copy pane.
+    const originalPane = document.getElementById('original-copy-pane');
+    if (originalPane) {
+      originalPane.replaceChildren();
+
+      const heading = document.createElement('div');
+      heading.className = 'diff-pane-heading';
+      heading.textContent = 'Original Submitted Copy';
+
+      const paragraph = document.createElement('p');
+      paragraph.style.color = '#cbd5e1';
+      paragraph.style.whiteSpace = 'pre-wrap';
+      paragraph.textContent = result.diff?.original_text || rawText;
+
+      originalPane.append(heading, paragraph);
+    }
+
+    // Show the rule-based recommended text.
+    const suggestedPane = document.getElementById('ai-suggested-pane');
+    if (suggestedPane) {
+      suggestedPane.replaceChildren();
+
+      const heading = document.createElement('div');
+      heading.style.cssText =
+        'font-weight:700;color:#86efac;font-size:.82rem;margin-bottom:8px;';
+      heading.textContent = 'Recommended Copy (Rule-Based)';
+
+      const paragraph = document.createElement('p');
+      paragraph.style.cssText = 'color:#fff;white-space:pre-wrap;line-height:1.7;';
+      paragraph.textContent =
+        result.diff?.recommended_text || 'No revised copy returned.';
+
+      suggestedPane.append(heading, paragraph);
+    }
+
+    // Create or update a section for the AI explanation and findings.
+    let resultsPanel = document.getElementById('live-scan-results');
+
+    if (!resultsPanel) {
+      resultsPanel = document.createElement('div');
+      resultsPanel.id = 'live-scan-results';
+      resultsPanel.style.cssText =
+        'background:#090a0f;border:1px solid var(--border-subtle);' +
+        'border-radius:12px;padding:20px;margin:20px 0;';
+
+      const recentSection = document.getElementById('section-recent');
+      const recentCard = recentSection?.querySelector('.card');
+
+      if (recentCard) {
+        recentCard.prepend(resultsPanel);
       }
-    }, 600);
-  },
+    }
+
+    if (resultsPanel) {
+      resultsPanel.replaceChildren();
+
+      const heading = document.createElement('h3');
+      heading.textContent = 'Latest Compliance Scan';
+      heading.style.marginBottom = '12px';
+
+      const summary = document.createElement('p');
+      summary.style.marginBottom = '12px';
+      summary.textContent =
+        `Status: ${result.overall_status} | Score: ${result.compliance_score}/100 | ` +
+        `Findings: ${result.flags.length}`;
+
+      const aiHeading = document.createElement('h4');
+      aiHeading.textContent = 'AI Explanation';
+      aiHeading.style.margin = '16px 0 8px';
+
+      const explanation = document.createElement('p');
+      explanation.style.cssText =
+        'white-space:pre-wrap;line-height:1.7;color:#cbd5e1;';
+      explanation.textContent =
+        result.ai_explanation || 'No AI explanation was returned.';
+
+      const flagsHeading = document.createElement('h4');
+      flagsHeading.textContent = 'Detected Findings';
+      flagsHeading.style.margin = '18px 0 8px';
+
+      const flagsList = document.createElement('ul');
+      flagsList.style.paddingLeft = '22px';
+
+      for (const flag of result.flags || []) {
+        const item = document.createElement('li');
+        item.style.marginBottom = '12px';
+
+        const titleLine = document.createElement('strong');
+        titleLine.textContent =
+          `[${String(flag.severity).toUpperCase()}] ${flag.title}`;
+
+        const details = document.createElement('p');
+        details.style.cssText =
+          'color:#cbd5e1;margin:4px 0;line-height:1.5;';
+        details.textContent =
+          `${flag.description} Recommended fix: ${flag.recommended_fix}`;
+
+        item.append(titleLine, details);
+        flagsList.appendChild(item);
+      }
+
+      resultsPanel.append(
+        heading,
+        summary,
+        aiHeading,
+        explanation,
+        flagsHeading,
+        flagsList
+      );
+    }
+
+    // Add the real scan to the recent-scans table.
+    const tbody = document.getElementById('recent-scans-tbody');
+
+    if (tbody) {
+      const row = document.createElement('tr');
+      row.style.borderBottom = '1px solid var(--border-subtle)';
+
+      const titleCell = document.createElement('td');
+      titleCell.style.padding = '14px 18px';
+      titleCell.textContent = `${result.title} (${result.scan_id})`;
+
+      const channelCell = document.createElement('td');
+      channelCell.style.padding = '14px';
+      channelCell.textContent = result.target_channel;
+
+      const scoreCell = document.createElement('td');
+      scoreCell.style.padding = '14px';
+      scoreCell.textContent = `${result.compliance_score}/100`;
+
+      const actionCell = document.createElement('td');
+      actionCell.style.padding = '14px 18px';
+      actionCell.style.textAlign = 'right';
+      actionCell.textContent = result.overall_status;
+
+      row.append(titleCell, channelCell, scoreCell, actionCell);
+      tbody.prepend(row);
+    }
+
+    this.showMainSection('recent');
+
+    resultsPanel?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+
+    Toast.show('Real compliance results loaded!', 'success');
+
+    console.log('BrandVerify scan result:', result);
+
+  } catch (error) {
+    console.error('Text scan failed:', error);
+    Toast.show(
+      `Scan failed: ${error.message}. Check the backend terminal.`,
+      'error'
+    );
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.textContent = oldButtonText;
+    }
+  }
+},
+
+
 
   openAddBrandModal() {
     const modal = document.getElementById('add-brand-modal');

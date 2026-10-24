@@ -46,5 +46,6 @@ class ScanResult(BaseModel):
     overall_status: str  # compliant, non_compliant, warnings_detected
     compliance_score: int = Field(..., ge=0, le=100)
     flags: List[ComplianceFlag] = Field(default_factory=list)
+    ai_explanation: Optional[str] = None
     diff: Optional[ScanDiffItem] = None
     scanned_at: datetime = Field(default_factory=datetime.utcnow)
