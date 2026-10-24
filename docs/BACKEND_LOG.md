@@ -193,3 +193,18 @@ Step 17 DONE: simulated image/audio/video results are labelled, not saved
     a saved scan.
   - Real image/audio/video checks stay PARKED.
   - Undo: git revert <commit "Label simulated image/audio/video results...">
+
+Step 18 DONE: AI call no longer blocks the server
+  - Why: POST /verify/text called explain_findings() directly inside an
+    async endpoint. That call is a network request (up to 20 s timeout),
+    so while it waited, the whole server could not answer anyone else.
+  - Edited: backend/api/verify.py. The text endpoint now runs
+    explain_findings through run_in_threadpool. The document upload,
+    save_scan and history endpoints already did.
+  - New: backend/tests/test_ai_not_blocking.py (2 tests). A fake explainer
+    records whether it ran on the event loop or in a worker thread, for
+    both the text and document endpoints. Total: 47 passed.
+  - Not changed: the verify_text_compliance rule check is fast regex and
+    still runs inline. The AI call keeps its 20 s timeout and its fallback
+    messages.
+  - Undo: git revert <commit "Run the AI explanation call in a worker thread...">
