@@ -1,3 +1,18 @@
+from backend.db import SessionLocal, ScanRecord, AuditRecord
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+from fastapi import Depends, HTTPException, Response
+from sqlalchemy.orm import Session
+
+from fastapi import Depends
+from sqlalchemy.orm import Session
 """
 Scan History and Review Endpoints
 
@@ -98,3 +113,24 @@ async def get_audit_log(scan_id: str):
     if scan is None:
         raise HTTPException(status_code=404, detail="Scan not found")
     return await run_in_threadpool(db.list_audit, scan_id)
+
+
+
+
+@router.get("/{scan_id}/report.pdf")
+def download_scan_pdf_report(scan_id: str, db: Session = Depends(get_db)):
+    from backend.services.pdf_report import generate_scan_pdf_report
+    from backend.models.audit import AuditRecord
+
+    scan = db.query(ScanResult).filter(ScanResult.id == scan_id).first()
+    if not scan:
+        raise HTTPException(status_code=404, detail="Scan not found")
+
+    audit_records = db.query(AuditRecord).filter(AuditRecord.scan_id == scan_id).order_by(AuditRecord.timestamp.asc()).all()
+    pdf_bytes = generate_scan_pdf_report(scan, audit_records)
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename=audit_report_{scan_id}.pdf"}
+    )
