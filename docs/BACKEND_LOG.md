@@ -115,3 +115,28 @@ Step 15 DONE: shared status rule
 
 Step 15 CONFIRMED: 18 tests pass.
   - Undo for step 15: git revert c356703
+
+Step 16A DONE: document text extraction
+  - New: backend/services/doc_extractor.py (extract_document: .pdf via
+    PyMuPDF, .docx via python-docx incl. tables, headers and footers).
+    Imports are lazy so a missing library cannot crash the server.
+  - New: backend/tests/test_doc_extractor.py (5 tests, use temp files).
+  - New dependency: python-docx>=1.1.0 added to requirements.txt and
+    backend/requirements.txt (PyMuPDF added to backend/requirements.txt).
+    TEAM: python-docx was not in the original requirements.
+  - Not connected to any endpoint yet (that is part B).
+  - Known limit: scanned PDFs have no text layer; extractor returns
+    has_text = False. OCR (pytesseract, in the roadmap) is a later step.
+  - If PyMuPDF is not installed locally, the 2 PDF tests are skipped.
+    Install later: pip install --default-timeout=120 --retries 10 PyMuPDF
+  - Undo: git revert <commit "Add document text extraction for PDF and DOCX">
+
+## AGREED ESSENTIAL PLAN (README items parked for later)
+  1. 16A document reader (done)
+  2. 16B document upload: size/type limits, claim rules on the text, save to history
+  3. 16C required-disclaimer check for documents
+  4. Label simulated image/audio/video results honestly, do not save them
+  5. Stop the AI call from blocking the server
+  6. Per-brand rules from files so brand_id changes the checks
+  7. Alembic migrations
+  PARKED: real image/audio/video checks, OCR, Celery/Redis, PostgreSQL, auth.
