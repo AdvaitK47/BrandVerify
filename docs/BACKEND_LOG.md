@@ -262,3 +262,35 @@ Step 20 DONE: PII masking before the AI call
     is still a hosted Groq model, not a local Llama/Mistral as the
     submission describes.
   - Undo: git revert <commit "Mask personal details before text is sent...">
+
+Step 21 DONE: approve/reject decisions with a permanent audit log
+  - Why: the submission promises human approval and "immutable decision
+    logs". Before this, a scan could be saved but nobody could approve or
+    reject it.
+  - New table audit_log (db.py: AuditRecord). Created automatically at
+    startup by init_db (create_all); the existing scans table is untouched.
+    No Alembic migration exists yet.
+  - New endpoints (api/scans.py):
+      POST /api/v1/scans/{scan_id}/decision   body: decision
+        ("approved" | "rejected"), reviewer, comment. Rejecting needs a
+        comment. Approving a scan with a critical flag needs a comment and
+        is recorded with overrode_critical = true. Unknown scan: 404.
+      GET  /api/v1/scans/{scan_id}/audit      every decision, oldest first.
+  - review_status ("pending_review", "approved", "rejected") added to
+    ScanResult and ScanSummary; the latest decision is the current status.
+    Scan history and scan detail fill it in.
+  - Immutable: the app can only add audit rows. An update or delete of an
+    AuditRecord raises AuditLogError (SQLAlchemy event guard), tested.
+    LIMIT: this is application-level only. Someone with direct database
+    access can still edit rows. Real protection needs PostgreSQL triggers
+    or permissions (later).
+  - LIMIT: no login yet, so the reviewer name is typed in and NOT
+    verified, and "creators cannot approve their own content" is not
+    enforced. Both need JWT login and roles (later).
+  - New: backend/models/audit.py, backend/tests/test_api_review.py
+    (10 tests). Total: 93 passed.
+  - Frontend TODO (teammate): connect review.html to the decision and audit
+    endpoints; show review_status on the dashboard and history. Scan
+    responses now include a review_status field.
+  - Undo: git revert <commit "Add approve/reject decisions with a
+    permanent audit log">. The audit_log table stays in the database file.
