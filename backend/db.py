@@ -9,7 +9,7 @@ import json
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from sqlalchemy import DateTime, Integer, String, Text, create_engine, select
+from sqlalchemy import Boolean, DateTime, Integer, String, Text, create_engine, event, select
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
 from backend.config import settings
@@ -90,3 +90,97 @@ def get_scan(scan_id: str) -> Optional[Dict[str, Any]]:
     with SessionLocal() as session:
         record = session.get(ScanRecord, scan_id)
         return json.loads(record.result_json) if record else None
+
+
+class AuditRecord(Base):
+    """One human decision on a scan. Rows are only ever added, never changed."""
+
+    __tablename__ = "audit_log"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    scan_id: Mapped[str] = mapped_column(String(64), index=True)
+    brand_id: Mapped[str] = mapped_column(String(128), index=True)
+    action: Mapped[str] = mapped_column(String(32))
+    reviewer: Mapped[str] = mapped_column(String(100))
+    comment: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    overrode_critical: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime)
+
+
+class AuditLogError(RuntimeError):
+    """Raised on any attempt to change or delete an audit log entry."""
+
+
+@event.listens_for(AuditRecord, "before_update")
+def _audit_rows_cannot_be_updated(mapper, connection, target):
+    raise AuditLogError("Audit log entries cannot be changed.")
+
+
+@event.listens_for(AuditRecord, "before_delete")
+def _audit_rows_cannot_be_deleted(mapper, connection, target):
+    raise AuditLogError("Audit log entries cannot be deleted.")
+
+
+def _audit_to_dict(record: AuditRecord) -> Dict[str, Any]:
+    return {
+        "id": record.id,
+        "scan_id": record.scan_id,
+        "brand_id": record.brand_id,
+        "action": record.action,
+        "reviewer": record.reviewer,
+        "comment": record.comment,
+        "overrode_critical": bool(record.overrode_critical),
+        "created_at": record.created_at,
+    }
+
+
+def add_audit_entry(
+    scan_id: str,
+    brand_id: str,
+    action: str,
+    reviewer: str,
+    comment: Optional[str],
+    overrode_critical: bool,
+) -> Dict[str, Any]:
+    """Append one decision to the audit log and return it."""
+    with SessionLocal() as session:
+        record = AuditRecord(
+            scan_id=scan_id,
+            brand_id=brand_id,
+            action=action,
+            reviewer=reviewer,
+            comment=comment,
+            overrode_critical=overrode_critical,
+            created_at=datetime.utcnow(),
+        )
+        session.add(record)
+        session.commit()
+        return _audit_to_dict(record)
+
+
+def list_audit(scan_id: str) -> List[Dict[str, Any]]:
+    """Every decision on one scan, oldest first."""
+    stmt = (
+        select(AuditRecord)
+        .where(AuditRecord.scan_id == scan_id)
+        .order_by(AuditRecord.id)
+    )
+    with SessionLocal() as session:
+        return [_audit_to_dict(r) for r in session.scalars(stmt).all()]
+
+
+def review_statuses(scan_ids: List[str]) -> Dict[str, str]:
+    """Latest decision per scan ('approved' or 'rejected').
+    Scans with no decision yet are left out of the result."""
+    if not scan_ids:
+        return {}
+    stmt = (
+        select(AuditRecord)
+        .where(AuditRecord.scan_id.in_(scan_ids))
+        .order_by(AuditRecord.id)
+    )
+    latest: Dict[str, str] = {}
+    with SessionLocal() as session:
+        for record in session.scalars(stmt).all():
+            latest[record.scan_id] = record.action
+    return latest

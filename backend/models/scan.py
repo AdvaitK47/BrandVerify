@@ -49,6 +49,7 @@ class ScanResult(BaseModel):
     ai_explanation: Optional[str] = None
     diff: Optional[ScanDiffItem] = None
     scanned_at: datetime = Field(default_factory=datetime.utcnow)
+    review_status: str = "pending_review"  # pending_review, approved, rejected
 
 
 class ScanSummary(BaseModel):
@@ -59,3 +60,4 @@ class ScanSummary(BaseModel):
     overall_status: Optional[str] = None
     compliance_score: int
     scanned_at: datetime
+    review_status: str = "pending_review"
