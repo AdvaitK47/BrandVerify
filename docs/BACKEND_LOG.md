@@ -82,7 +82,7 @@ Step 13 DONE: scan history
   - Verified: browser scan (25) and curl scan (70) both listed via
     GET /api/v1/scans; a fresh Python process reads them from brandverify.db.
     6 tests pass.
-  - Undo: git revert <commit "Save text scans to database; add scan history endpoints">
+  - Undo: git revert 2c033d0
   - NOT YET DONE: automated API tests (need a separate test database so
     tests do not write to brandverify.db). Only /verify/text saves scans;
     /verify/upload does not save yet (it still returns mock data).
