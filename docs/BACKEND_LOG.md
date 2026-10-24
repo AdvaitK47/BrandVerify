@@ -140,3 +140,20 @@ Step 16A DONE: document text extraction
   6. Per-brand rules from files so brand_id changes the checks
   7. Alembic migrations
   PARKED: real image/audio/video checks, OCR, Celery/Redis, PostgreSQL, auth.
+
+Step 16B DONE: document upload scanning
+  - Rewritten: backend/services/doc_verifier.py (was a mock). New
+    verify_document(): extract text, run verify_text_compliance on it.
+  - Edited: backend/api/verify.py. content_type=document now goes through
+    _verify_document_upload(): extension check (400), streamed to a temp
+    file with size limit (413), unreadable/empty -> 422, temp file always
+    deleted, AI explanation, saved to history, returns a ScanResult.
+  - Edited: backend/config.py (MAX_UPLOAD_MB = 25).
+  - New: backend/tests/test_api_documents.py (6 tests).
+  - Limits: each claim is flagged once per document (first match only);
+    no page numbers yet; scanned PDFs rejected (OCR parked); documents
+    have no diff pane (diff = None).
+  - Frontend TODO (teammate): the Document tab still shows "not connected
+    yet". Endpoint: POST /api/v1/verify/upload (multipart form: brand_id,
+    content_type=document, title, target_channel, custom_rule, file).
+  - Undo: git revert <commit "Scan uploaded DOCX/PDF documents...">
