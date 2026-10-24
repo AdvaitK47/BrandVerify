@@ -2,7 +2,7 @@
 Document Verification Service (.PDF, .DOCX)
 
 Extracts the document's text and runs the same claim rules used for text
-scans, so one rule set powers both. Required-disclaimer checks come later.
+scans, so one rule set powers both, then checks for required disclaimers.
 """
 
 from dataclasses import dataclass
@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import List, Optional, Union
 
 from backend.models.scan import ComplianceFlag
+from backend.services.disclaimer_check import check_required_disclaimers
 from backend.services.doc_extractor import DocumentError, extract_document
 from backend.services.text_verifier import verify_text_compliance
 
@@ -36,8 +37,9 @@ def verify_document(
         )
 
     diff = verify_text_compliance(extracted.text, custom_rule)
+    flags = diff.flags + check_required_disclaimers(extracted.text)
     return DocumentScan(
-        flags=diff.flags,
+        flags=flags,
         text=extracted.text,
         page_count=extracted.page_count,
     )
