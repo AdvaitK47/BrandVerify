@@ -30,10 +30,10 @@ def test_critical_is_warnings_detected():
     assert determine_overall_status([_flag(SeverityLevel.CRITICAL)]) == "warnings_detected"
 
 
-def test_upload_with_info_only_result_is_compliant(client):
-    # The audio checker is still a mock that returns one INFO flag.
-    # This test documents today's behavior and should be revisited when
-    # the real audio verifier replaces the mock.
+def test_upload_with_mock_audio_result_is_reported_as_simulated(client):
+    # The audio checker is still a mock. Its result must be labelled
+    # simulated, never reported as compliant. Revisit when the real
+    # audio verifier replaces the mock.
     response = client.post(
         "/api/v1/verify/upload",
         data={
@@ -45,4 +45,4 @@ def test_upload_with_info_only_result_is_compliant(client):
         files={"file": ("read.mp3", b"fake audio bytes", "audio/mpeg")},
     )
     assert response.status_code == 200
-    assert response.json()["overall_status"] == "compliant"
+    assert response.json()["overall_status"] == "simulated"

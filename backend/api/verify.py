@@ -146,19 +146,12 @@ async def verify_file_upload(
             detail=f"Unsupported content_type: {content_type}",
         )
 
-    score = calculate_compliance_score(flags)
-
-    return {
-        "scan_id": f"scan-{uuid.uuid4().hex[:8]}",
-        "brand_id": brand_id,
-        "content_type": content_type,
-        "filename": file.filename,
-        "title": title,
-        "target_channel": target_channel,
-        "overall_status": determine_overall_status(flags),
-        "compliance_score": score,
-        "flags": flags,
-    }
+    # The image, audio and video checkers do not analyse the file yet:
+    # they return fixed demo findings. Label the result as simulated and
+    # never save it to history.
+    return _simulated_response(
+        brand_id, content_type, file.filename, title, target_channel, flags
+    )
 
 
 async def _verify_document_upload(
@@ -231,3 +224,38 @@ async def _verify_document_upload(
         logger.exception("Could not save scan %s", result.scan_id)
 
     return result
+
+
+def _simulated_response(
+    brand_id: str,
+    content_type: str,
+    filename: Optional[str],
+    title: str,
+    target_channel: str,
+    flags,
+) -> dict:
+    """Honest response for checks that are not real yet (image/audio/video)."""
+
+    labelled = [
+        flag.model_copy(update={"title": f"[SIMULATED] {flag.title}"})
+        for flag in flags
+    ]
+
+    return {
+        "scan_id": None,
+        "brand_id": brand_id,
+        "content_type": content_type,
+        "filename": filename,
+        "title": title,
+        "target_channel": target_channel,
+        "overall_status": "simulated",
+        "compliance_score": None,
+        "flags": labelled,
+        "simulated": True,
+        "saved": False,
+        "notice": (
+            f"This is a demonstration result. BrandVerify does not analyse "
+            f"{content_type} files yet, so nothing here was measured from "
+            f"your file. It was not scored and was not saved to history."
+        ),
+    }
