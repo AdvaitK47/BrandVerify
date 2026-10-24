@@ -102,3 +102,13 @@ Step 14 DONE: API tests for scan history
 
 Step 14 CONFIRMED: 13 passed, real brandverify.db untouched (2 scans).
   - Undo for step 14: git revert f46c2eb
+
+Step 15 DONE: shared status rule
+  - File: backend/api/verify.py. New function determine_overall_status(flags):
+    "warnings_detected" if any flag is above info, else "compliant".
+    Used by both /verify/text and /verify/upload.
+  - Why: upload said "warnings_detected" for info-only results, text did not.
+  - New: backend/tests/test_status.py (5 tests). 18 tests pass.
+  - Open question for the team: should critical flags give "non_compliant"?
+    The ScanResult model comments list that status but nothing produces it.
+  - Undo: git revert <commit "Use one shared overall-status rule...">
