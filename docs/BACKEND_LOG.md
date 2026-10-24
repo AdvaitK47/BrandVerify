@@ -70,3 +70,5 @@ Step 12. Scan storage
   - Frontend: AI explanation shows raw ** markdown symbols.
   - Backend: /verify/upload still returns mock results for image, document,
     audio and video, and marks info-only results as warnings_detected.
+
+Step 12 CONFIRMED: fake-scan test passed (LIST had test-1, GET True, MISS None).
