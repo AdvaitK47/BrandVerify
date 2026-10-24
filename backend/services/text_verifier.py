@@ -88,7 +88,7 @@ def verify_text_compliance(
         # These are cautious suggestions, not verified factual claims.
         modified_text = re.sub(
             pattern,
-            fix,
+            lambda m: f"{m.group(0)} [REVIEW: {fix}]",
             modified_text,
             count=1,
             flags=re.IGNORECASE,

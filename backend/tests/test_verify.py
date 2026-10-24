@@ -40,3 +40,14 @@ def test_delta_e_divergent_colors():
     white_rgb = (255, 255, 255)
     black_rgb = (0, 0, 0)
     assert calculate_delta_e(white_rgb, black_rgb) > 5.0
+
+
+def test_recommended_text_keeps_original_wording():
+    sample_text = "Our engine is guaranteed to be 10X faster."
+    diff = verify_text_compliance(sample_text)
+
+    # Original words must still be there, with review notes added after them
+    assert "guaranteed [REVIEW:" in diff.recommended_text
+    assert "10X faster [REVIEW:" in diff.recommended_text
+    # The original text itself must not change
+    assert diff.original_text == sample_text
