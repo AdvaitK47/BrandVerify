@@ -1,168 +1,766 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Content Submission | BrandVerify</title>
-  <meta name="description" content="Submit content for automated pre-flight brand compliance, claim verification, and color harmony analysis.">
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  
-  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
-  <link rel="stylesheet" href="static/css/styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Submission | BrandVerify</title>
+    <meta name="description" content="Upload audio content for brand compliance checking.">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #f7f5f2;
+            --card: #ffffff;
+            --text: #242424;
+            --muted: #77716d;
+            --border: #e4ded8;
+            --accent: #8b3d4a;
+            --accent-dark: #702d39;
+            --success: #197447;
+            --danger: #b42318;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 20px 7%;
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand {
+            font-size: 23px;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .brand span {
+            color: var(--text);
+        }
+
+        nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 22px;
+        }
+
+        nav a {
+            color: #514c49;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        nav a:hover {
+            color: var(--accent);
+        }
+
+        main {
+            width: min(900px, 92%);
+            margin: 45px auto;
+        }
+
+        .eyebrow {
+            color: var(--accent);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 1.8px;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 10px 0;
+            font-size: clamp(30px, 5vw, 42px);
+        }
+
+        .intro {
+            color: var(--muted);
+            line-height: 1.7;
+            max-width: 650px;
+        }
+
+        .card {
+            margin-top: 28px;
+            padding: 30px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: 0 10px 35px rgba(40, 25, 20, 0.04);
+        }
+
+        .section-title {
+            margin: 0 0 8px;
+            font-size: 21px;
+        }
+
+        .section-description {
+            margin: 0 0 24px;
+            color: var(--muted);
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .dropzone {
+            padding: 35px 20px;
+            border: 2px dashed #cfc3bd;
+            border-radius: 14px;
+            text-align: center;
+            background: #fcfaf9;
+            transition: 0.2s ease;
+            cursor: pointer;
+        }
+
+        .dropzone:hover,
+        .dropzone.dragging {
+            border-color: var(--accent);
+            background: #fdf4f5;
+        }
+
+        .upload-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 58px;
+            height: 58px;
+            margin-bottom: 14px;
+            border-radius: 50%;
+            background: #f3e5e7;
+            color: var(--accent);
+            font-size: 27px;
+        }
+
+        .dropzone h3 {
+            margin: 0 0 8px;
+            font-size: 17px;
+        }
+
+        .dropzone p {
+            margin: 0 0 18px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .browse-button,
+        .scan-button,
+        .remove-button {
+            border: none;
+            border-radius: 9px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: 0.2s ease;
+        }
+
+        .browse-button {
+            padding: 11px 19px;
+            color: var(--accent);
+            background: #fff;
+            border: 1px solid var(--accent);
+        }
+
+        .browse-button:hover {
+            background: #f8e9ec;
+        }
+
+        .file-info {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 16px;
+            padding: 15px;
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            background: #fff;
+        }
+
+        .file-info.visible {
+            display: flex;
+        }
+
+        .file-details {
+            min-width: 0;
+        }
+
+        .file-name {
+            overflow-wrap: anywhere;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .file-size {
+            margin-top: 5px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .remove-button {
+            flex-shrink: 0;
+            padding: 8px 11px;
+            background: #f5e9e8;
+            color: #8e302b;
+        }
+
+        .settings {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-top: 26px;
+        }
+
+        .field label {
+            display: block;
+            margin-bottom: 9px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .field input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            font-size: 14px;
+            background: #fff;
+        }
+
+        .field small {
+            display: block;
+            margin-top: 7px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .scan-button {
+            width: 100%;
+            margin-top: 25px;
+            padding: 15px 20px;
+            background: var(--accent);
+            color: #fff;
+            font-size: 15px;
+        }
+
+        .scan-button:hover:not(:disabled) {
+            background: var(--accent-dark);
+        }
+
+        .scan-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .status {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+
+        .status.visible {
+            display: block;
+        }
+
+        .status.info {
+            background: #eef3ff;
+            color: #244b91;
+        }
+
+        .status.success {
+            background: #eaf7ef;
+            color: var(--success);
+        }
+
+        .status.error {
+            background: #fff0ee;
+            color: var(--danger);
+        }
+
+        .results {
+            display: none;
+            margin-top: 22px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: #fff;
+        }
+
+        .results.visible {
+            display: block;
+        }
+
+        .results h3 {
+            margin-top: 0;
+        }
+
+        .results pre {
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        footer {
+            padding: 25px 7%;
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .settings {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .dropzone {
+                padding: 28px 14px;
+            }
+        }
+    </style>
 </head>
+
 <body>
+    <header>
+        <div class="brand">Brand<span>Verify</span></div>
 
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="submission.html">Submit Content</a>
+        </nav>
+    </header>
 
-  <!-- Top Floating Glass Navbar -->
-  <header class="navbar">
-    <!-- BrandVerify Logo (No space, no circular badge) -->
-    <a href="index.html" class="nav-brand" title="BrandVerify Home">
-      <img src="static/images/BrandVerify.svg" alt="BrandVerify" class="brand-logo-img">
-    </a>
+    <main>
+        <div class="eyebrow">Content governance</div>
+        <h1>Submit your audio content</h1>
 
-    <!-- Top Center Tabs: Overview, Dashboard, Compliance Checker -->
-    <nav class="nav-links-center">
-      <a href="index.html" class="nav-tab-link">Overview</a>
-      <a href="dashboard.html" class="nav-tab-link">Dashboard</a>
-      <a href="brand.html" class="nav-tab-link active">Compliance Checker</a>
-    </nav>
+        <p class="intro">
+            Upload an audio file to check its loudness against your selected
+            target. Review the scan response before deciding whether the
+            content is ready for approval.
+        </p>
 
-    <!-- Top Right Actions -->
-    <div class="nav-actions">
-      <!-- Guest State: ONLY Log In -->
-      <div id="nav-guest-actions" style="display: flex; align-items: center; gap: 10px;">
-        <button type="button" class="btn btn-secondary btn-sm" onclick="AuthUI.openSignInModal('login')">
-          Log In
-        </button>
-      </div>
+        <form id="submission-form" class="card">
+            <h2 class="section-title">Upload audio</h2>
 
-      <!-- Logged-In State: Newspaper B&W PFP with dropdown -->
-      <div id="nav-user-profile" style="display: none; align-items: center; gap: 10px; position: relative;">
-        <div class="user-pfp-wrapper" onclick="AuthUI.togglePfpMenu(event)" title="User Profile">
-          <img src="static/images/avatar_newspaper.jpg" alt="User Avatar" class="newspaper-pfp" id="nav-pfp-img">
-        </div>
+            <p class="section-description">
+                Select an audio file from your device or drag it into the
+                upload area. Supported formats depend on your backend's
+                audio-processing libraries.
+            </p>
 
-        <div class="pfp-dropdown-menu" id="pfp-dropdown-menu">
-          <div class="pfp-dropdown-header">
-            <img src="static/images/avatar_newspaper.jpg" alt="User Profile" class="newspaper-pfp-sm">
-            <div>
-              <div class="pfp-dropdown-name">Alex Vance</div>
-              <div class="pfp-dropdown-email" id="nav-user-email">alex@brandverify.ai</div>
+            <input
+                id="file-upload-input"
+                name="file"
+                type="file"
+                accept="audio/*,.wav,.mp3,.m4a,.aac,.flac,.ogg"
+                hidden
+                required
+            >
+
+            <div
+                class="dropzone"
+                id="dropzone"
+                role="button"
+                tabindex="0"
+                aria-label="Choose an audio file"
+            >
+                <div class="upload-icon" aria-hidden="true">↑</div>
+
+                <h3>Drop your audio file here</h3>
+                <p>Or browse your device to choose a file</p>
+
+                <button
+                    type="button"
+                    class="browse-button"
+                    id="browse-button"
+                >
+                    Browse files
+                </button>
             </div>
-          </div>
-          <a href="dashboard.html" class="pfp-dropdown-item">Managed Brands</a>
-          <a href="brand.html" class="pfp-dropdown-item">Compliance Workspace</a>
-          <div class="pfp-dropdown-divider"></div>
-          <button type="button" class="pfp-dropdown-item text-danger" onclick="AuthUI.signOut()">Log Out</button>
-        </div>
-      </div>
-    </div>
-  </header>
 
-  <!-- Main Container -->
-  <main class="container" style="max-width: 960px;">
+            <div class="file-info" id="file-info">
+                <div class="file-details">
+                    <div class="file-name" id="file-name"></div>
+                    <div class="file-size" id="file-size"></div>
+                </div>
 
-    <!-- Breadcrumb & Header -->
-    <div style="margin-bottom: 24px;">
-      <h1 style="font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 6px;">
-        Submit Content for Pre-Flight Scan
-      </h1>
-      <p style="color: var(--text-secondary);">Upload text copy, visual brand assets, or video commercials for real-time compliance evaluation.</p>
-    </div>
-
-    <!-- Active Brand Profile Bar -->
-    <div class="card" style="margin-bottom: 24px; padding: 18px 24px;">
-      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
-        <div>
-          <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); font-weight: 700;">
-            Enforcing Brand Profile
-          </div>
-          <div style="font-size: 1.15rem; font-weight: 800; color: #fff; margin-top: 2px;" id="active-brand-name">
-            Acme Global Technologies
-          </div>
-        </div>
-
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <div style="text-align: right;">
-            <div style="font-size: 0.72rem; color: var(--text-muted);">Active Rulebook</div>
-            <div style="font-size: 0.88rem; font-weight: 600; color: #cbd5e1;" id="active-rulebook-name">
-              FTC Tech & Cloud Performance Claims v3.2
+                <button
+                    type="button"
+                    class="remove-button"
+                    id="remove-button"
+                >
+                    Remove
+                </button>
             </div>
-          </div>
-          <a href="dashboard.html" class="btn btn-secondary btn-sm" style="font-size: 0.78rem;">
-            Change
-          </a>
-        </div>
-      </div>
-    </div>
 
-    <!-- Content Submission Form -->
-    <form id="asset-submission-form" onsubmit="event.preventDefault(); Toast.show('Pre-flight scan started. Redirecting to review...', 'info'); setTimeout(() => { window.location.href = 'review.html'; }, 600);">
-      
-      <!-- Section 1: Campaign Info -->
-      <div class="card" style="margin-bottom: 24px;">
-        <div class="card-header">
-          <h3 class="card-title">Campaign Details</h3>
-        </div>
+            <div class="settings">
+                <div class="field">
+                    <label for="target-lufs">Target loudness (LUFS)</label>
+                    <input
+                        id="target-lufs"
+                        name="target_lufs"
+                        type="number"
+                        value="-24"
+                        step="0.1"
+                        min="-70"
+                        max="0"
+                        required
+                    >
+                    <small>Default: -24 LUFS</small>
+                </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-          <div class="form-group">
-            <label class="form-label" for="campaign-name">Campaign Title</label>
-            <input type="text" id="campaign-name" class="form-control" value="Q4 Product Launch - CloudScale Engine" required>
-          </div>
+                <div class="field">
+                    <label for="tolerance-lu">Allowed tolerance (LU)</label>
+                    <input
+                        id="tolerance-lu"
+                        name="tolerance_lu"
+                        type="number"
+                        value="1"
+                        step="0.1"
+                        min="0"
+                        max="20"
+                        required
+                    >
+                    <small>Default: ±1 LU</small>
+                </div>
+            </div>
 
-          <div class="form-group">
-            <label class="form-label" for="target-channel">Target Channel</label>
-            <select id="target-channel" class="form-select">
-              <option value="social">Social Media (LinkedIn, Twitter/X, Instagram)</option>
-              <option value="billboard">Billboard / Print Media</option>
-              <option value="commercial">Commercial Video Broadcast</option>
-              <option value="press">Press Release</option>
-              <option value="other">Other Channel / Custom Target</option>
-            </select>
-          </div>
-        </div>
-      </div>
+            <button
+                type="submit"
+                class="scan-button"
+                id="scan-button"
+                disabled
+            >
+                Scan audio for compliance
+            </button>
 
-      <!-- Section 2: Asset Payload -->
-      <div class="card" style="margin-bottom: 24px;">
-        <div class="card-header">
-          <h3 class="card-title">Ad Copy / Text Content</h3>
-        </div>
+            <div
+                class="status"
+                id="status"
+                role="status"
+                aria-live="polite"
+            ></div>
 
-        <div class="form-group">
-          <label class="form-label" for="text-payload">Marketing Copy for Substantiation Scan</label>
-          <textarea id="text-payload" class="form-textarea" rows="4" placeholder="Enter headline, body copy, and taglines...">BrandVerify CloudScale engine is guaranteed to be 10X faster than any competitor on the market with zero downtime. Upgrade today to eliminate all latency across your multi-tenant asset pipeline.</textarea>
-        </div>
+            <div class="results" id="results">
+                <h3>Scan response</h3>
+                <pre id="results-output"></pre>
+            </div>
+        </form>
+    </main>
 
-        <div class="form-group" style="margin-bottom: 0;">
-          <label class="form-label">Attach Accompanying Assets (Image, Video, Audio or PDF)</label>
-          <div class="dropzone" onclick="document.getElementById('file-upload-input').click()">
-            <input type="file" id="file-upload-input" style="display: none;" onchange="Toast.show(`Attached ${this.files[0]?.name}`, 'success')">
-            <div style="font-size: 1.8rem; margin-bottom: 8px;">📁</div>
-            <div style="font-weight: 700; color: #fff; margin-bottom: 4px;">Click to select file or drag & drop</div>
-            <div style="font-size: 0.8rem; color: var(--text-muted);">Supports PNG, JPG, MP4, MOV, MP3, PDF, DOCX (Max 250MB)</div>
-          </div>
-        </div>
-      </div>
+    <footer>
+        BrandVerify · Review content before publishing
+    </footer>
 
-      <!-- Submit Action Bar -->
-      <div style="display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 40px;">
-        <a href="dashboard.html" class="btn btn-secondary">
-          Cancel
-        </a>
-        <button type="submit" class="btn btn-white">
-          Run Pre-Flight Scan →
-        </button>
-      </div>
+    <script>
+        "use strict";
 
-    </form>
+        // Update this if your backend uses a different address or port.
+        const API_BASE = "http://127.0.0.1:8000";
+        const AUDIO_SCAN_URL = `${API_BASE}/api/media/audio/scan`;
 
-  </main>
+        const form = document.getElementById("submission-form");
+        const fileInput = document.getElementById("file-upload-input");
+        const dropzone = document.getElementById("dropzone");
+        const browseButton = document.getElementById("browse-button");
+        const removeButton = document.getElementById("remove-button");
+        const fileInfo = document.getElementById("file-info");
+        const fileName = document.getElementById("file-name");
+        const fileSize = document.getElementById("file-size");
+        const scanButton = document.getElementById("scan-button");
+        const statusBox = document.getElementById("status");
+        const resultsBox = document.getElementById("results");
+        const resultsOutput = document.getElementById("results-output");
 
-  <script src="static/js/app.js"></script>
+        let selectedFile = null;
+        let isScanning = false;
+
+        console.log("BrandVerify submission page script loaded.");
+
+        function showStatus(message, type = "info") {
+            statusBox.textContent = message;
+            statusBox.className = `status visible ${type}`;
+        }
+
+        function hideStatus() {
+            statusBox.textContent = "";
+            statusBox.className = "status";
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes < 1024) {
+                return `${bytes} bytes`;
+            }
+
+            if (bytes < 1024 * 1024) {
+                return `${(bytes / 1024).toFixed(1)} KB`;
+            }
+
+            return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+        }
+
+        function isAudioFile(file) {
+            const audioExtensions =
+                /\.(wav|mp3|m4a|aac|flac|ogg|oga|opus|wma)$/i;
+
+            return (
+                file.type.startsWith("audio/") ||
+                audioExtensions.test(file.name)
+            );
+        }
+
+        function setSelectedFile(file) {
+            hideStatus();
+            resultsBox.classList.remove("visible");
+
+            if (!file) {
+                clearSelectedFile();
+                return;
+            }
+
+            if (!isAudioFile(file)) {
+                clearSelectedFile();
+                showStatus(
+                    "Please select an audio file, such as WAV, MP3, M4A, AAC, FLAC, or OGG.",
+                    "error"
+                );
+                return;
+            }
+
+            // Prevent unexpectedly large uploads in the demo.
+            if (file.size > 100 * 1024 * 1024) {
+                clearSelectedFile();
+                showStatus(
+                    "This file is larger than 100 MB. Please choose a smaller file.",
+                    "error"
+                );
+                return;
+            }
+
+            selectedFile = file;
+
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            fileInfo.classList.add("visible");
+            scanButton.disabled = false;
+
+            console.log("Selected file:", file.name, file.type, file.size);
+        }
+
+        function clearSelectedFile() {
+            selectedFile = null;
+            fileInput.value = "";
+            fileName.textContent = "";
+            fileSize.textContent = "";
+            fileInfo.classList.remove("visible");
+            scanButton.disabled = true;
+        }
+
+        function openFilePicker() {
+            if (!isScanning) {
+                fileInput.click();
+            }
+        }
+
+        browseButton.addEventListener("click", (event) => {
+            event.stopPropagation();
+            openFilePicker();
+        });
+
+        dropzone.addEventListener("click", (event) => {
+            if (event.target !== browseButton) {
+                openFilePicker();
+            }
+        });
+
+        dropzone.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                openFilePicker();
+            }
+        });
+
+        fileInput.addEventListener("change", () => {
+            console.log("File input change event fired.");
+
+            const file = fileInput.files && fileInput.files[0];
+
+            if (file) {
+                setSelectedFile(file);
+            } else {
+                console.log("No file was selected.");
+            }
+        });
+
+        removeButton.addEventListener("click", () => {
+            clearSelectedFile();
+            hideStatus();
+            resultsBox.classList.remove("visible");
+        });
+
+        // Drag-and-drop support.
+        ["dragenter", "dragover"].forEach((eventName) => {
+            dropzone.addEventListener(eventName, (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                dropzone.classList.add("dragging");
+            });
+        });
+
+        ["dragleave", "drop"].forEach((eventName) => {
+            dropzone.addEventListener(eventName, (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                dropzone.classList.remove("dragging");
+            });
+        });
+
+        dropzone.addEventListener("drop", (event) => {
+            if (isScanning) {
+                return;
+            }
+
+            const file = event.dataTransfer?.files?.[0];
+
+            if (file) {
+                setSelectedFile(file);
+            }
+        });
+
+        async function scanAudio(file) {
+            const targetLufs = document.getElementById("target-lufs").value;
+            const toleranceLu = document.getElementById("tolerance-lu").value;
+
+            if (targetLufs === "" || toleranceLu === "") {
+                showStatus("Please enter both loudness settings.", "error");
+                return;
+            }
+
+            const targetValue = Number(targetLufs);
+            const toleranceValue = Number(toleranceLu);
+
+            if (
+                !Number.isFinite(targetValue) ||
+                targetValue < -70 ||
+                targetValue > 0
+            ) {
+                showStatus("Target loudness must be between -70 and 0 LUFS.", "error");
+                return;
+            }
+
+            if (
+                !Number.isFinite(toleranceValue) ||
+                toleranceValue < 0 ||
+                toleranceValue > 20
+            ) {
+                showStatus("Tolerance must be between 0 and 20 LU.", "error");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("target_lufs", String(targetValue));
+            formData.append("tolerance_lu", String(toleranceValue));
+
+            isScanning = true;
+            scanButton.disabled = true;
+            scanButton.textContent = "Scanning audio...";
+            resultsBox.classList.remove("visible");
+            showStatus("Uploading audio and waiting for the compliance scan...", "info");
+
+            try {
+                const response = await fetch(AUDIO_SCAN_URL, {
+                    method: "POST",
+                    body: formData
+                });
+
+                const responseText = await response.text();
+                let responseData;
+
+                try {
+                    responseData = responseText
+                        ? JSON.parse(responseText)
+                        : {};
+                } catch {
+                    responseData = { detail: responseText };
+                }
+
+                if (!response.ok) {
+                    const detail =
+                        responseData.detail ||
+                        responseData.message ||
+                        `Server returned HTTP ${response.status}.`;
+
+                    throw new Error(
+                        typeof detail === "string"
+                            ? detail
+                            : JSON.stringify(detail)
+                    );
+                }
+
+                resultsOutput.textContent = JSON.stringify(
+                    responseData,
+                    null,
+                    2
+                );
+
+                resultsBox.classList.add("visible");
+                showStatus("Audio scan completed. Review the response below.", "success");
+
+                console.log("Audio scan response:", responseData);
+            } catch (error) {
+                console.error("Audio scan failed:", error);
+
+                showStatus(
+                    `Could not complete the scan. ${error.message}. Check that your FastAPI backend is running at ${API_BASE} and that the audio scan endpoint is available.`,
+                    "error"
+                );
+            } finally {
+                isScanning = false;
+                scanButton.textContent = "Scan audio for compliance";
+                scanButton.disabled = !selectedFile;
+            }
+        }
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            console.log("Submission form submitted.");
+
+            if (isScanning) {
+                return;
+            }
+
+            if (!selectedFile) {
+                showStatus("Please select an audio file first.", "error");
+                return;
+            }
+
+            await scanAudio(selectedFile);
+        });
+    </script>
 </body>
 </html>

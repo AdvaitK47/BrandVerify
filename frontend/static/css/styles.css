@@ -1015,3 +1015,58 @@ a {
 .main-section-panel.active {
   display: block;
 }
+
+.media-scanner {
+  max-width: 760px;
+  margin: 32px auto;
+  padding: 28px;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  background: #ffffff;
+  color: #1f2937;
+}
+
+.media-scanner form {
+  display: grid;
+  gap: 12px;
+}
+
+.media-scanner input,
+.media-scanner select,
+.media-scanner button {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.media-scanner button {
+  background: #5145cd;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.media-scanner button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.compliance-finding {
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+}
+
+.compliance-finding h5 {
+  margin: 0 0 8px;
+  text-transform: capitalize;
+}
+
+#scanResults {
+  margin-top: 24px;
+  overflow-wrap: anywhere;
+}

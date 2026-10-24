@@ -1,0 +1,18 @@
+# Add this import near the top of backend/main.py:
+from fastapi.middleware.cors import CORSMiddleware
+
+# Add this after `app = FastAPI(...)` and before requests are handled:
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://127.0.0.1:5500",
+        "http://localhost:5500",
+        "http://127.0.0.1:5501",
+        "http://localhost:5501",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Keep your existing include_router(...) calls and endpoints unchanged.
