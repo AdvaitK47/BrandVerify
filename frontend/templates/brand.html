@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Brand & Upload Checkers | BrandVerify</title>
+  <meta name="description" content="Manage brand rulebooks, assets, and run pre-flight compliance checks across text, documents, images, audio, and video.">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <link rel="stylesheet" href="static/css/styles.css">
+</head>
+<body>
+
+
+  <!-- Top Floating Glass Navbar -->
+  <header class="navbar">
+    <!-- BrandVerify Logo (No space, no circular badge) -->
+    <a href="index.html" class="nav-brand" title="BrandVerify Home">
+      <img src="static/images/BrandVerify.svg" alt="BrandVerify" class="brand-logo-img">
+    </a>
+
+    <!-- Top Center Tabs: Overview, Dashboard, Compliance Checker -->
+    <nav class="nav-links-center">
+      <a href="index.html" class="nav-tab-link">Overview</a>
+      <a href="dashboard.html" class="nav-tab-link">Dashboard</a>
+      <a href="brand.html" class="nav-tab-link active">Compliance Checker</a>
+    </nav>
+
+    <!-- Top Right Actions -->
+    <div class="nav-actions">
+      <!-- Guest State: ONLY Log In -->
+      <div id="nav-guest-actions" style="display: flex; align-items: center; gap: 10px;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="AuthUI.openSignInModal('login')">
+          Log In
+        </button>
+      </div>
+
+      <!-- Logged-In State: Newspaper B&W PFP with dropdown -->
+      <div id="nav-user-profile" style="display: none; align-items: center; gap: 10px; position: relative;">
+        <div class="user-pfp-wrapper" onclick="AuthUI.togglePfpMenu(event)" title="User Profile">
+          <img src="static/images/avatar_newspaper.jpg" alt="User Avatar" class="newspaper-pfp" id="nav-pfp-img">
+        </div>
+
+        <div class="pfp-dropdown-menu" id="pfp-dropdown-menu">
+          <div class="pfp-dropdown-header">
+            <img src="static/images/avatar_newspaper.jpg" alt="User Profile" class="newspaper-pfp-sm">
+            <div>
+              <div class="pfp-dropdown-name">Alex Vance</div>
+              <div class="pfp-dropdown-email" id="nav-user-email">alex@brandverify.ai</div>
+            </div>
+          </div>
+          <a href="dashboard.html" class="pfp-dropdown-item">Managed Brands</a>
+          <a href="brand.html" class="pfp-dropdown-item">Compliance Workspace</a>
+          <div class="pfp-dropdown-divider"></div>
+          <button type="button" class="pfp-dropdown-item text-danger" onclick="AuthUI.signOut()">Log Out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container">
+
+    <!-- Top Navigation: Back to Dashboard Button -->
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+      <a href="dashboard.html" class="btn-back">
+        <span>← Back to Managed Brands</span>
+      </a>
+
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span class="badge badge-brand">
+          <span class="badge-dot"></span>Pre-Flight Governance Workspace
+        </span>
+      </div>
+    </div>
+
+    <!-- Active Brand Context Header (With Live Brand Switcher) -->
+    <div class="card" style="margin-bottom: 24px; padding: 22px 28px; background: var(--bg-card);">
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+        
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div class="brand-avatar-box" id="brand-page-avatar" style="width: 58px; height: 58px; font-size: 1.35rem; background: linear-gradient(135deg, #27272a, #3f3f46);">
+            AT
+          </div>
+          <div>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 4px; flex-wrap: wrap;">
+              <h1 style="font-size: 1.7rem; font-weight: 800; letter-spacing: -0.03em; margin: 0;" id="brand-page-name">
+                Acme Global Technologies
+              </h1>
+
+              <!-- Brand Switcher Dropdown (If no brand was preselected or user wants to switch) -->
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <label for="brand-page-select" style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">
+                  Switch Brand:
+                </label>
+                <select id="brand-page-select" class="brand-select-header" onchange="BrandManager.switchActiveBrand(this.value)">
+                  <!-- Populated dynamically with all brands -->
+                </select>
+              </div>
+            </div>
+
+            <div style="font-size: 0.85rem; color: var(--text-secondary);" id="brand-page-industry">
+              Enterprise Cloud & SaaS • Active Rulebook: <strong style="color: #fff;" id="brand-page-rulebook">FTC Tech & Cloud Claims v3.2</strong>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="BrandManager.openAddBrandModal()">
+            + Add New Brand
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         THREE MAIN SECTIONS (Matching User Architecture Tree)
+         1. Rule Book ("Upload any kind of assets...")
+         2. Compliance Checker (Text, Document, Post Image, Audio Check, Video Check)
+         3. Recent (Scans, Side-by-Side Diff, Review Actions)
+         ==================================================================== -->
+    <div class="main-brand-sections">
+      <button type="button" class="section-pill-btn active" id="sec-btn-checker" onclick="BrandManager.showMainSection('checker')">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        Compliance Checker
+      </button>
+
+      <button type="button" class="section-pill-btn" id="sec-btn-rulebook" onclick="BrandManager.showMainSection('rulebook')">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        Brand Rule Book & Assets
+      </button>
+
+      <button type="button" class="section-pill-btn" id="sec-btn-recent" onclick="BrandManager.showMainSection('recent')">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Recent Scans & Reviews
+      </button>
+    </div>
+
+    <!-- ====================================================================
+         SECTION 1: COMPLIANCE CHECKER (Upload Section with 5 sub-checkers)
+         ==================================================================== -->
+    <section class="main-section-panel active" id="section-checker">
+      <div class="card" style="padding: 28px; margin-bottom: 36px;">
+        
+        <!-- Checker Subtabs: Monotone Line Icons -->
+        <div class="checker-subtabs">
+          <button type="button" class="checker-subtab-btn active" id="subtab-btn-text" onclick="BrandManager.switchCheckerType('text')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            Text Check
+          </button>
+          <button type="button" class="checker-subtab-btn" id="subtab-btn-doc" onclick="BrandManager.switchCheckerType('doc')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            Document Check
+          </button>
+          <button type="button" class="checker-subtab-btn" id="subtab-btn-image" onclick="BrandManager.switchCheckerType('image')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            Post & Image Check
+          </button>
+          <button type="button" class="checker-subtab-btn" id="subtab-btn-audio" onclick="BrandManager.switchCheckerType('audio')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+            Audio Check
+          </button>
+          <button type="button" class="checker-subtab-btn" id="subtab-btn-video" onclick="BrandManager.switchCheckerType('video')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+            Video / Ad Check
+          </button>
+        </div>
+
+        <!-- 1. TEXT CHECKER -->
+        <div class="checker-panel active" id="tab-text">
+          <form onsubmit="BrandManager.runCheck(event, 'Text Copy')">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Submission Title</label>
+                <input type="text" class="form-control" value="Q4 CloudScale Promotional Headline" required>
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Target Channel</label>
+                <select class="form-select">
+                  <option>Social Media (LinkedIn, Twitter/X)</option>
+                  <option>Billboard / Print Ad</option>
+                  <option>Press Release</option>
+                  <option>Commercial Script</option>
+                  <option>Landing Page Copy</option>
+                  <option value="other">Other Channel / Custom Target</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Specific Rule Text Box for this Upload -->
+            <div class="form-group">
+              <label class="form-label" style="display: flex; align-items: center; justify-content: space-between;">
+                <span>Specific Rule for this Upload (Optional)</span>
+                <span style="font-size: 0.76rem; color: var(--text-muted); font-weight: normal;">Custom scan rule</span>
+              </label>
+              <input type="text" class="form-control custom-rule-input" placeholder='e.g., "Check if the description of taste is done more than 2 seconds", "No competitor mentions", or "Ensure 18+ footer"' value="Ensure no unsubstantiated superlatives or absolute uptime guarantees without benchmark lab audit.">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Copied Text to Verify</label>
+              <textarea class="form-textarea" rows="4" placeholder="Paste your ad copy, post headline, or marketing draft here...">BrandVerify CloudScale engine is guaranteed to be 10X faster than any competitor on the market with zero downtime. Upgrade today to eliminate all latency across your multi-tenant asset pipeline.</textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end;">
+              <button type="submit" class="btn btn-white btn-lg">
+                Run Pre-Flight Text Scan →
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- 2. DOCUMENT CHECK -->
+        <div class="checker-panel" id="tab-doc">
+          <form onsubmit="BrandManager.runCheck(event, 'Document File')">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Document Title</label>
+                <input type="text" class="form-control" value="Q4 Product Whitepaper & Brief v2" required>
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Target Channel</label>
+                <select class="form-select">
+                  <option>Customer Whitepaper (.PDF)</option>
+                  <option>Investor PR Wire (.DOCX)</option>
+                  <option>Sales Deck Documentation</option>
+                  <option>Regulatory Submission</option>
+                  <option value="other">Other Channel / Custom Target</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Specific Rule Text Box for this Upload -->
+            <div class="form-group">
+              <label class="form-label" style="display: flex; align-items: center; justify-content: space-between;">
+                <span>Specific Rule for this Upload (Optional)</span>
+                <span style="font-size: 0.76rem; color: var(--text-muted); font-weight: normal;">Custom scan rule</span>
+              </label>
+              <input type="text" class="form-control custom-rule-input" placeholder='e.g., "Check if the description of taste is done more than 2 seconds", "Must include safe harbor footnote"'>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Upload Document (.PDF, .TXT, .DOCX)</label>
+              <div class="dropzone" onclick="document.getElementById('doc-file-input').click()">
+                <input type="file" id="doc-file-input" class="form-control" accept=".pdf,.doc,.docx,.txt" style="display: none;">
+                <div style="font-weight: 700; color: #fff; margin-bottom: 4px;">Click to select document or drag & drop</div>
+                <div style="font-size: 0.82rem; color: var(--text-muted);">Supports .PDF, .DOCX, .DOC, .TXT up to 50MB</div>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end;">
+              <button type="submit" class="btn btn-white btn-lg">
+                Run Document Compliance Scan →
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- 3. POSTS AND IMAGES CHECK -->
+        <div class="checker-panel" id="tab-image">
+          <form onsubmit="BrandManager.runCheck(event, 'Image Creative')">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Post / Image Title</label>
+                <input type="text" class="form-control" value="Billboard 4K Hero Creative" required>
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Target Channel</label>
+                <select class="form-select">
+                  <option>4K Billboard / Print Media</option>
+                  <option>Instagram / Social Post (1:1 / 4:5)</option>
+                  <option>Website Hero Banner</option>
+                  <option>LinkedIn Carousel Image</option>
+                  <option value="other">Other Channel / Custom Target</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Specific Rule Text Box for this Upload -->
+            <div class="form-group">
+              <label class="form-label" style="display: flex; align-items: center; justify-content: space-between;">
+                <span>Specific Rule for this Upload (Optional)</span>
+                <span style="font-size: 0.76rem; color: var(--text-muted); font-weight: normal;">Custom scan rule</span>
+              </label>
+              <input type="text" class="form-control custom-rule-input" placeholder='e.g., "Check if logo clear space is at least 40px", "Delta-E color distance under 2.5"'>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Upload Graphic Asset (.PNG, .JPG, .WEBP, .SVG)</label>
+              <div class="dropzone" onclick="document.getElementById('image-file-input').click()">
+                <input type="file" id="image-file-input" class="form-control" accept="image/*" style="display: none;">
+                <div style="font-weight: 700; color: #fff; margin-bottom: 4px;">Click to select creative image or drag & drop</div>
+                <div style="font-size: 0.82rem; color: var(--text-muted);">Supports PNG, JPG, WEBP, SVG with automatic Delta-E & logo zone detection</div>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end;">
+              <button type="submit" class="btn btn-white btn-lg">
+                Run Image Compliance Scan →
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- 4. AUDIO CHECK -->
+        <div class="checker-panel" id="tab-audio">
+          <form onsubmit="BrandManager.runCheck(event, 'Audio Track')">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Audio Title</label>
+                <input type="text" class="form-control" value="Podcast Ad Read (30s)" required>
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Target Channel</label>
+                <select class="form-select">
+                  <option>Podcast Sponsorship Audio</option>
+                  <option>Radio Broadcast</option>
+                  <option>Video Voiceover Track</option>
+                  <option>Streaming Audio Spot</option>
+                  <option value="other">Other Channel / Custom Target</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Specific Rule Text Box for this Upload -->
+            <div class="form-group">
+              <label class="form-label" style="display: flex; align-items: center; justify-content: space-between;">
+                <span>Specific Rule for this Upload (Optional)</span>
+                <span style="font-size: 0.76rem; color: var(--text-muted); font-weight: normal;">Custom scan rule</span>
+              </label>
+              <input type="text" class="form-control custom-rule-input" placeholder='e.g., "Check speech pacing does not exceed 160 wpm", "Check spoken claims have disclaimers"'>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Upload Audio File (.MP3, .WAV, .AAC)</label>
+              <div class="dropzone" onclick="document.getElementById('audio-file-input').click()">
+                <input type="file" id="audio-file-input" class="form-control" accept="audio/*" style="display: none;">
+                <div style="font-weight: 700; color: #fff; margin-bottom: 4px;">Click to select audio track or drag & drop</div>
+                <div style="font-size: 0.82rem; color: var(--text-muted);">Supports MP3, WAV, AAC with automated speech-to-text claim transcription</div>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end;">
+              <button type="submit" class="btn btn-white btn-lg">
+                Run Audio Compliance Scan →
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- 5. VIDEO / AD CHECK -->
+        <div class="checker-panel" id="tab-video">
+          <form onsubmit="BrandManager.runCheck(event, 'Video Reel')">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Video / Ad Title</label>
+                <input type="text" class="form-control" value="Keynote Commercial Teaser (60s)" required>
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Target Channel</label>
+                <select class="form-select">
+                  <option>YouTube 60s Commercial</option>
+                  <option>TV Broadcast Commercial</option>
+                  <option>TikTok / Instagram Reel (9:16)</option>
+                  <option>Connected TV (CTV) Pre-roll</option>
+                  <option value="other">Other Channel / Custom Target</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Specific Rule Text Box for this Upload -->
+            <div class="form-group">
+              <label class="form-label" style="display: flex; align-items: center; justify-content: space-between;">
+                <span>Specific Rule for this Upload (Optional)</span>
+                <span style="font-size: 0.76rem; color: var(--text-muted); font-weight: normal;">Custom scan rule</span>
+              </label>
+              <input type="text" class="form-control custom-rule-input" placeholder='e.g., "Check if the description of taste is done more than 2 seconds", "Logo must be visible for at least 3 seconds", "Mandatory disclaimer footer"'>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Upload Video File (.MP4, .MOV, .WEBM)</label>
+              <div class="dropzone" onclick="document.getElementById('video-file-input').click()">
+                <input type="file" id="video-file-input" class="form-control" accept="video/*" style="display: none;">
+                <div style="font-weight: 700; color: #fff; margin-bottom: 4px;">Click to select video creative or drag & drop</div>
+                <div style="font-size: 0.82rem; color: var(--text-muted);">Supports MP4, MOV, WEBM with scene pacing, on-screen text, and audio transcription</div>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end;">
+              <button type="submit" class="btn btn-white btn-lg">
+                Run Video Compliance Scan →
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 2: BRAND RULE BOOK & ASSETS (Node 1 in User Tree)
+         "Upload any kind of assets. Images, document this the ai will understand based on titles or formats aswell"
+         ==================================================================== -->
+    <section class="main-section-panel" id="section-rulebook">
+      <div class="card" style="padding: 28px; margin-bottom: 36px;">
+        
+        <div style="margin-bottom: 24px;">
+          <h2 style="font-size: 1.4rem; font-weight: 800; color: #fff; margin-bottom: 6px;">
+            Brand Rule Books, Assets & Guidelines
+          </h2>
+          <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">
+            Upload any kind of assets — guidelines, style rulebooks, PDFs, logo vectors, color palettes, tone-of-voice docs, product details, or legal disclosures. 
+            <strong style="color: #38bdf8;">BrandVerify AI automatically understands and indexes them based on titles and file formats.</strong>
+          </p>
+        </div>
+
+        <!-- Universal Asset Dropzone -->
+        <div class="dropzone" style="margin-bottom: 28px;" onclick="document.getElementById('rulebook-upload-input').click()">
+          <input type="file" id="rulebook-upload-input" multiple accept=".pdf,.doc,.docx,.txt,image/*,.json" style="display: none;" onchange="BrandManager.handleRulebookFiles(event)">
+          <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(56, 189, 248, 0.1); color: var(--brand-blue); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          </div>
+          <div style="font-weight: 700; font-size: 1.05rem; color: #fff; margin-bottom: 4px;">
+            Drag & drop rulebook documents, guidelines, or brand assets, or <span style="color: var(--brand-blue);">browse files</span>
+          </div>
+          <div style="font-size: 0.82rem; color: var(--text-muted);">
+            PDF rulebooks, Word (.DOCX), Text instructions, Logos (.SVG, .PNG), or Color Palettes (.JSON)
+          </div>
+        </div>
+
+        <!-- Active Brand Inventory List -->
+        <div style="background: #090a0f; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 20px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+            <div style="font-size: 0.85rem; font-weight: 700; color: #fff;">
+              Active Brand Assets & Rulebook Index (AI Indexed):
+            </div>
+            <span style="font-size: 0.76rem; color: var(--text-muted);">All assets parsed & enforced in scans</span>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.85rem;" id="rulebook-items-list">
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(255,255,255,0.03); border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+              <span>📄 <strong>Acme_FTC_Rulebook_v3.2.pdf</strong> — <em style="color:var(--text-muted);font-size:0.8rem;">42 Claim Rules Indexed</em></span>
+              <span class="badge badge-pass">Active</span>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(255,255,255,0.03); border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+              <span>🖼️ <strong>Acme_Primary_Logo_Vector.svg</strong> — <em style="color:var(--text-muted);font-size:0.8rem;">Clear Space & Safe Margin Rules</em></span>
+              <span class="badge badge-pass">Active</span>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(255,255,255,0.03); border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+              <span>🎨 <strong>Brand_Palettes_DeltaE.json</strong> — <em style="color:var(--text-muted);font-size:0.8rem;">3 Approved HEX Colors (ΔE &lt; 2.5)</em></span>
+              <span class="badge badge-pass">Active</span>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(255,255,255,0.03); border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+              <span>⚖️ <strong>Safe_Harbor_Disclaimers.docx</strong> — <em style="color:var(--text-muted);font-size:0.8rem;">Mandatory Legal Disclosures</em></span>
+              <span class="badge badge-pass">Active</span>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(255,255,255,0.03); border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+              <span>📝 <strong>Sensory_Taste_Duration_Rules.txt</strong> — <em style="color:var(--text-muted);font-size:0.8rem;">Taste claims require >= 2s screen display</em></span>
+              <span class="badge badge-pass">Active</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 3: RECENT SCANS & REVIEWS (Node 3 in User Tree)
+         ==================================================================== -->
+    <section class="main-section-panel" id="section-recent">
+      <div class="card" style="padding: 28px; margin-bottom: 40px;">
+        <div class="card-header" style="margin-bottom: 20px;">
+          <div>
+            <h2 style="font-size: 1.4rem; font-weight: 800; color: #fff; margin-bottom: 4px;">
+              Recent Content Scans & Pre-Flight Reviews
+            </h2>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">
+              Inspect side-by-side diff comparisons, flagged compliance items, and accept recommendations.
+            </p>
+          </div>
+        </div>
+
+        <!-- Side-by-Side Diff Review Box for Current Flagged Item -->
+        <div style="background: #090a0f; border: 1px solid rgba(244, 63, 94, 0.25); border-radius: var(--radius-lg); padding: 22px; margin-bottom: 28px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="badge badge-fail"><span class="badge-dot"></span>Action Required (68% Score)</span>
+                <span style="font-size: 0.8rem; color: var(--text-muted);" class="mono">ID: BV-8492</span>
+              </div>
+              <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-top: 4px;">
+                CloudScale Engine Q4 Launch Copy
+              </h3>
+            </div>
+
+            <!-- Review Actions -->
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button type="button" class="btn btn-white btn-sm" onclick="ReviewDiffController.acceptSuggestions()">
+                ✓ Accept Suggestions
+              </button>
+              <button type="button" id="btn-edit-copy" class="btn btn-secondary btn-sm" onclick="ReviewDiffController.toggleInlineEdit()">
+                Edit Copy
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="ReviewDiffController.openOverrideModal()">
+                Keep Original
+              </button>
+              <button type="button" class="btn btn-primary btn-sm" onclick="ReviewDiffController.executeOneClickApproval()">
+                One-Click Approval
+              </button>
+            </div>
+          </div>
+
+          <!-- Side-by-Side Comparison Panes -->
+          <div class="diff-container" style="margin-bottom: 16px;">
+            <div class="diff-pane" id="original-copy-pane">
+              <div style="font-weight: 700; color: #cbd5e1; font-size: 0.82rem; margin-bottom: 8px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 6px;">
+                Original Submitted Copy
+              </div>
+              <p style="color: #cbd5e1;">
+                BrandVerify CloudScale engine is 
+                <span class="diff-del">guaranteed to be 10X faster than any competitor on the market</span> 
+                with 
+                <span class="diff-del">zero downtime</span>. 
+                Upgrade today to eliminate all latency across your multi-tenant asset pipeline.
+              </p>
+            </div>
+
+            <div class="diff-pane" id="ai-suggested-pane" style="border-color: rgba(16, 185, 129, 0.3);">
+              <div style="font-weight: 700; color: #86efac; font-size: 0.82rem; margin-bottom: 8px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 6px;">
+                AI Recommended Compliant Copy
+              </div>
+              <p style="color: #ffffff;">
+                BrandVerify CloudScale engine is 
+                <span class="diff-ins">engineered to deliver up to 10X faster benchmark processing</span> 
+                according to verified Q3 internal lab benchmarks. Seamlessly integrate your multi-tenant asset pipeline with 
+                <span class="diff-ins">guaranteed compliance logging</span>.
+              </p>
+              <div style="margin-top: 10px; font-size: 0.76rem; color: #94a3b8; border-top: 1px solid var(--border-subtle); padding-top: 6px;">
+                Audited Footnote: <em>Benchmark claims audited by CloudMetrics Labs Q3 2026. Individual performance may vary.</em>
+              </div>
+            </div>
+          </div>
+
+          <!-- Flagged Issues Callouts (Muted Red & Yellow) -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font-size: 0.82rem;">
+            <div style="background: var(--review-red-bg); border-left: 3px solid var(--review-red); padding: 10px 14px; border-radius: 4px;">
+              <strong style="color: var(--review-red);">Critical Claim Flag:</strong> "guaranteed to be 10X faster" lacks benchmark audit reference.
+            </div>
+            <div style="background: var(--review-yellow-bg); border-left: 3px solid var(--review-yellow); padding: 10px 14px; border-radius: 4px;">
+              <strong style="color: var(--review-yellow);">Warning Flag:</strong> "zero downtime" is an absolute SLA guarantee prohibited by rulebook.
+            </div>
+          </div>
+        </div>
+
+        <!-- Scans Table for other recent uploads -->
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
+            <thead>
+              <tr style="border-bottom: 1px solid var(--border-subtle); background: rgba(0,0,0,0.2); color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">
+                <th style="padding: 12px 18px;">Asset Title</th>
+                <th style="padding: 12px 14px;">Channel / Field</th>
+                <th style="padding: 12px 14px;">Compliance Score</th>
+                <th style="padding: 12px 18px; text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="recent-scans-tbody">
+              <tr style="border-bottom: 1px solid var(--border-subtle);">
+                <td style="padding: 14px 18px;">
+                  <div style="font-weight: 700; color: #fff;">Billboard 4K Hero Canvas</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);" class="mono">ID: BV-8490 • 45 mins ago</div>
+                </td>
+                <td style="padding: 14px 14px;">
+                  <span class="badge badge-brand">Posts & Images</span>
+                </td>
+                <td style="padding: 14px 14px;">
+                  <span class="badge badge-pass"><span class="badge-dot"></span>98% Pass (ΔE &lt; 2.5)</span>
+                </td>
+                <td style="padding: 14px 18px; text-align: right;">
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="Toast.show('Compliance certificate downloaded.', 'success')">
+                    Download PDF
+                  </button>
+                </td>
+              </tr>
+
+              <tr style="border-bottom: 1px solid var(--border-subtle);">
+                <td style="padding: 14px 18px;">
+                  <div style="font-weight: 700; color: #fff;">Keynote Commercial Teaser (60s)</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);" class="mono">ID: BV-8488 • 2 hrs ago</div>
+                </td>
+                <td style="padding: 14px 14px;">
+                  <span class="badge badge-brand">Video & Audio</span>
+                </td>
+                <td style="padding: 14px 14px;">
+                  <span class="badge badge-warn"><span class="badge-dot"></span>82% Notice (Disclaimer Pace)</span>
+                </td>
+                <td style="padding: 14px 18px; text-align: right;">
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="Toast.show('Opening audio transcript review...', 'info')">
+                    View Diff
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Override Modal (Keep Original) -->
+  <div class="modal-backdrop" id="override-modal">
+    <div class="modal-box">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+        <h3 style="font-size: 1.2rem; font-weight: 800; color: #fff;">Register Override Rationale</h3>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('override-modal').classList.remove('active')">✕</button>
+      </div>
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 14px;">
+        To retain original copy despite compliance warnings, record your legal justification.
+      </p>
+      <div class="form-group">
+        <label class="form-label">Justification Rationale</label>
+        <textarea id="override-reason-input" class="form-textarea" rows="3" placeholder="Reference legal counsel approval or audit ticket #..."></textarea>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('override-modal').classList.remove('active')">Cancel</button>
+        <button type="button" class="btn btn-white btn-sm" onclick="ReviewDiffController.saveOverride()">Submit Override</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Approval Modal (One-Click Signoff) -->
+  <div class="modal-backdrop" id="approval-success-modal">
+    <div class="modal-box" style="text-align: center;">
+      <div style="font-size: 2.5rem; margin-bottom: 10px; color: #10b981;">✓</div>
+      <h2 style="font-size: 1.4rem; font-weight: 800; color: #fff; margin-bottom: 8px;">
+        Asset Approved for Release!
+      </h2>
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 20px;">
+        Pre-flight brand governance certificate generated for <strong>BV-8492</strong>.
+      </p>
+      <div style="display: flex; gap: 10px; justify-content: center;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('approval-success-modal').classList.remove('active')">Close</button>
+        <button type="button" class="btn btn-white btn-sm" onclick="Toast.show('Compliance Certificate PDF downloaded.', 'success')">
+          Download Certificate
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Brand Modal -->
+  <div class="modal-backdrop" id="add-brand-modal">
+    <div class="modal-box">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+        <h2 style="font-size: 1.3rem; font-weight: 800; color: #fff;">
+          Add a New Brand
+        </h2>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="BrandManager.closeAddBrandModal()" style="padding: 4px 10px;">✕</button>
+      </div>
+
+      <form onsubmit="BrandManager.addNewBrand(event)">
+        <div class="form-group">
+          <label class="form-label" for="new-brand-name">Brand Name</label>
+          <input type="text" id="new-brand-name" class="form-control" required placeholder="e.g. Stripe, Tesla, Nike">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="new-brand-industry">Industry / Category</label>
+          <input type="text" id="new-brand-industry" class="form-control" required placeholder="e.g. FinTech, Electric Vehicles, Apparel">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Upload Brand Logo</label>
+          <input type="file" class="form-control" accept="image/*">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="new-brand-rulebook">Initial Rulebook or Guidelines</label>
+          <input type="text" id="new-brand-rulebook" class="form-control" placeholder="e.g. Standard Brand Guidelines v1.0">
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="BrandManager.closeAddBrandModal()">Cancel</button>
+          <button type="submit" class="btn btn-white btn-sm">Create Brand</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="static/js/app.js"></script>
+  <script>
+    // Initialize brand details & query params on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const requestedId = params.get('id');
+      
+      // Auto-select requested brand or default to the first brand if none selected
+      BrandManager.loadBrandPage(requestedId);
+
+      // Check section and subtab requests
+      const section = params.get('section');
+      const tab = params.get('tab');
+      const type = params.get('type');
+
+      if (section) {
+        BrandManager.showMainSection(section);
+      } else if (tab === 'tab-rulebooks' || tab === 'rulebook') {
+        BrandManager.showMainSection('rulebook');
+      } else if (tab === 'recent') {
+        BrandManager.showMainSection('recent');
+      } else {
+        // Default is compliance checker
+        BrandManager.showMainSection('checker');
+      }
+
+      // If specific checker type is specified
+      if (type) {
+        BrandManager.switchCheckerType(type);
+      } else if (tab && tab.startsWith('tab-') && tab !== 'tab-rulebooks') {
+        BrandManager.switchCheckerType(tab.replace('tab-', ''));
+      }
+    });
+  </script>
+</body>
+</html>

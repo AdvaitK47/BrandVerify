@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compliance Review & Diff Hub | BrandVerify</title>
+  <meta name="description" content="Side-by-side compliance diff analysis, automated claim recommendations, and one-click brand approval.">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <link rel="stylesheet" href="static/css/styles.css">
+</head>
+<body>
+
+
+  <!-- Top Floating Glass Navbar -->
+  <header class="navbar">
+    <!-- BrandVerify Logo (No space, no circular badge) -->
+    <a href="index.html" class="nav-brand" title="BrandVerify Home">
+      <img src="static/images/BrandVerify.svg" alt="BrandVerify" class="brand-logo-img">
+    </a>
+
+    <!-- Top Center Tabs: Overview, Dashboard, Compliance Checker -->
+    <nav class="nav-links-center">
+      <a href="index.html" class="nav-tab-link">Overview</a>
+      <a href="dashboard.html" class="nav-tab-link">Dashboard</a>
+      <a href="brand.html" class="nav-tab-link active">Compliance Checker</a>
+    </nav>
+
+    <!-- Top Right Actions -->
+    <div class="nav-actions">
+      <!-- Guest State: ONLY Log In -->
+      <div id="nav-guest-actions" style="display: flex; align-items: center; gap: 10px;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="AuthUI.openSignInModal('login')">
+          Log In
+        </button>
+      </div>
+
+      <!-- Logged-In State: Newspaper B&W PFP with dropdown -->
+      <div id="nav-user-profile" style="display: none; align-items: center; gap: 10px; position: relative;">
+        <div class="user-pfp-wrapper" onclick="AuthUI.togglePfpMenu(event)" title="User Profile">
+          <img src="static/images/avatar_newspaper.jpg" alt="User Avatar" class="newspaper-pfp" id="nav-pfp-img">
+        </div>
+
+        <div class="pfp-dropdown-menu" id="pfp-dropdown-menu">
+          <div class="pfp-dropdown-header">
+            <img src="static/images/avatar_newspaper.jpg" alt="User Profile" class="newspaper-pfp-sm">
+            <div>
+              <div class="pfp-dropdown-name">Alex Vance</div>
+              <div class="pfp-dropdown-email" id="nav-user-email">alex@brandverify.ai</div>
+            </div>
+          </div>
+          <a href="dashboard.html" class="pfp-dropdown-item">Managed Brands</a>
+          <a href="brand.html" class="pfp-dropdown-item">Compliance Workspace</a>
+          <div class="pfp-dropdown-divider"></div>
+          <button type="button" class="pfp-dropdown-item text-danger" onclick="AuthUI.signOut()">Log Out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container">
+
+    <!-- Top Score Header -->
+    <div class="card" style="margin-bottom: 24px; padding: 22px 28px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+        <div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px;">
+            Asset ID: <strong style="color: #fff;">BV-8492</strong> • CloudScale Engine Q4 Launch Copy
+          </div>
+          <h1 style="font-size: 1.8rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 4px;">
+            Pre-Flight Compliance Review
+          </h1>
+          <div style="font-size: 0.85rem; color: var(--text-secondary);">
+            Client: <strong style="color: #fff;" id="active-brand-name">Acme Global Technologies</strong> • Rulebook: <strong style="color: #fff;" id="active-rulebook-name">FTC Tech & Cloud Claims v3.2</strong>
+          </div>
+        </div>
+
+        <!-- Compliance Score Indicator (Muted Colors) -->
+        <div style="display: flex; align-items: center; gap: 16px; background: #0e0e11; border: 1px solid var(--border-subtle); padding: 14px 22px; border-radius: var(--radius-md);">
+          <div>
+            <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Compliance Score</div>
+            <div style="font-size: 2.2rem; font-weight: 800; color: var(--review-red); line-height: 1;" id="compliance-score-metric">
+              68/100
+            </div>
+          </div>
+          <div style="height: 36px; width: 1px; background: var(--border-subtle);"></div>
+          <div>
+            <div style="font-size: 0.8rem; font-weight: 700; color: var(--review-yellow);">2 Flags Found</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Review recommendations below</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Review Action Buttons Bar -->
+    <div class="card" style="margin-bottom: 24px; padding: 16px 24px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+        <div style="font-size: 0.85rem; font-weight: 600; color: #d4d4d8;">
+          Review Actions:
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <!-- 1. Accept AI Suggestions -->
+          <button type="button" id="btn-accept-diff" class="btn btn-white btn-sm" onclick="ReviewDiffController.acceptSuggestions()">
+            ✓ Accept AI Suggestions
+          </button>
+
+          <!-- 2. Edit Copy Inline -->
+          <button type="button" id="btn-edit-copy" class="btn btn-secondary btn-sm" onclick="ReviewDiffController.toggleInlineEdit()">
+            Edit Copy
+          </button>
+
+          <!-- 3. Keep Original (Override) -->
+          <button type="button" class="btn btn-secondary btn-sm" onclick="ReviewDiffController.openOverrideModal()">
+            Keep Original
+          </button>
+
+          <!-- 4. One-Click Approval -->
+          <button type="button" id="btn-oneclick-approve" class="btn btn-white btn-sm" onclick="ReviewDiffController.executeOneClickApproval()">
+            One-Click Approval
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Side-by-Side Diff & Issues Grid -->
+    <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 24px; margin-bottom: 40px;">
+      
+      <!-- LEFT: Side-by-Side Diff View -->
+      <div>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+          <h3 style="font-size: 1.1rem; font-weight: 700; color: #fff;">
+            Side-by-Side Text Comparison
+          </h3>
+          <div style="display: flex; gap: 8px; font-size: 0.75rem;">
+            <span class="badge badge-fail">[ - ] Flagged Claim</span>
+            <span class="badge badge-pass">[ + ] Recommended Fix</span>
+          </div>
+        </div>
+
+        <div class="diff-container">
+          <!-- Left: Original Copy -->
+          <div class="diff-pane" id="original-copy-pane">
+            <div style="font-weight: 700; color: #d4d4d8; font-size: 0.85rem; margin-bottom: 12px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">
+              Original Submitted Copy
+            </div>
+            <p style="color: #d4d4d8;">
+              BrandVerify CloudScale engine is 
+              <span class="diff-del" title="Absolute superlative">guaranteed to be 10X faster than any competitor on the market</span> 
+              with 
+              <span class="diff-del" title="Prohibited guarantee">zero downtime</span>. 
+              Upgrade today to eliminate all latency across your multi-tenant asset pipeline.
+            </p>
+          </div>
+
+          <!-- Right: AI Compliant Copy -->
+          <div class="diff-pane" id="ai-suggested-pane" style="border-color: var(--review-green-border);">
+            <div style="font-weight: 700; color: var(--review-green); font-size: 0.85rem; margin-bottom: 12px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">
+              AI Recommended Compliant Copy
+            </div>
+            <p style="color: #ffffff;">
+              BrandVerify CloudScale engine is 
+              <span class="diff-ins">engineered to deliver up to 10X faster benchmark processing</span> 
+              according to verified Q3 internal lab benchmarks. Seamlessly integrate your multi-tenant asset pipeline with 
+              <span class="diff-ins">guaranteed compliance logging</span>.
+            </p>
+            <div style="margin-top: 14px; font-size: 0.78rem; color: #a1a1aa; border-top: 1px solid var(--border-subtle); padding-top: 8px;">
+              Audited Disclaimer: <em>Benchmark claims audited by CloudMetrics Labs Q3 2026. Individual performance may vary.</em>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Flagged Issues Inspector (Muted Colors) -->
+      <div>
+        <h3 style="font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 12px;">
+          Flagged Compliance Issues (2)
+        </h3>
+
+        <!-- Issue 1 -->
+        <div class="card" style="margin-bottom: 14px; border-left: 4px solid var(--review-red); padding: 18px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+            <span class="badge badge-fail"><span class="badge-dot"></span>Critical Issue</span>
+            <span style="font-size: 0.72rem; color: var(--text-muted);">FTC Guideline</span>
+          </div>
+          <div style="font-weight: 700; color: #fff; font-size: 0.95rem; margin-bottom: 4px;">
+            Unsubstantiated Performance Claim
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px;">
+            Absolute superlative detected without mandatory third-party audit reference.
+          </p>
+          <div style="font-size: 0.78rem; background: #000; padding: 6px 10px; border-radius: 4px; color: var(--review-red); font-family: var(--font-mono);">
+            "guaranteed to be 10X faster than any competitor on the market"
+          </div>
+        </div>
+
+        <!-- Issue 2 -->
+        <div class="card" style="margin-bottom: 14px; border-left: 4px solid var(--review-yellow); padding: 18px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+            <span class="badge badge-warn"><span class="badge-dot"></span>Warning</span>
+            <span style="font-size: 0.72rem; color: var(--text-muted);">Prohibited Term</span>
+          </div>
+          <div style="font-weight: 700; color: #fff; font-size: 0.95rem; margin-bottom: 4px;">
+            Absolute Guarantee ("zero downtime")
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px;">
+            Brand rulebook blacklists absolute downtime guarantees in marketing copy.
+          </p>
+          <div style="font-size: 0.78rem; background: #000; padding: 6px 10px; border-radius: 4px; color: var(--review-yellow); font-family: var(--font-mono);">
+            "with zero downtime"
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Override Modal (Keep Original) -->
+  <div class="modal-backdrop" id="override-modal">
+    <div class="modal-box">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+        <h3 style="font-size: 1.2rem; font-weight: 800; color: #fff;">Register Override Rationale</h3>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('override-modal').classList.remove('active')">✕</button>
+      </div>
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 14px;">
+        To retain original copy despite flagged compliance warnings, record your legal justification.
+      </p>
+      <div class="form-group">
+        <label class="form-label">Justification Rationale</label>
+        <textarea id="override-reason-input" class="form-textarea" rows="3" placeholder="Reference legal counsel approval or audit ticket #..."></textarea>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('override-modal').classList.remove('active')">Cancel</button>
+        <button type="button" class="btn btn-white btn-sm" onclick="ReviewDiffController.saveOverride()">Submit Override</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Approval Modal (One-Click Signoff) -->
+  <div class="modal-backdrop" id="approval-success-modal">
+    <div class="modal-box" style="text-align: center;">
+      <div style="font-size: 2.5rem; margin-bottom: 10px;">✓</div>
+      <h2 style="font-size: 1.4rem; font-weight: 800; color: #fff; margin-bottom: 8px;">
+        Asset Approved for Release!
+      </h2>
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 20px;">
+        Compliance certificate generated for BV-8492. Asset meets all brand policy standards.
+      </p>
+      <div style="display: flex; gap: 10px; justify-content: center;">
+        <a href="dashboard.html" class="btn btn-secondary btn-sm">Return to Dashboard</a>
+        <button type="button" class="btn btn-white btn-sm" onclick="Toast.show('Audit Certificate PDF downloaded.', 'success')">
+          Download Certificate
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="static/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Managed Brands | BrandVerify</title>
+  <meta name="description" content="View and manage all your brand profiles, logos, palettes, and compliance scans.">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <link rel="stylesheet" href="static/css/styles.css">
+</head>
+<body>
+
+
+  <!-- Top Header (Clean Flat Edge-to-Edge - No Capsule Pill) -->
+  <header class="navbar">
+    <!-- BrandVerify Logo (No space, no circular badge) -->
+    <a href="index.html" class="nav-brand" title="BrandVerify Home">
+      <img src="static/images/BrandVerify.svg" alt="BrandVerify" class="brand-logo-img">
+    </a>
+
+    <!-- Top Center Tabs: Overview, Dashboard, Compliance Checker -->
+    <nav class="nav-links-center">
+      <a href="index.html" class="nav-tab-link">Overview</a>
+      <a href="dashboard.html" class="nav-tab-link active">Dashboard</a>
+      <a href="brand.html" class="nav-tab-link">Compliance Checker</a>
+    </nav>
+
+    <!-- Top Right Actions: Log In in yellow box area (or newspaper B&W pfp if logged in) -->
+    <div class="nav-actions">
+      <!-- Guest State: ONLY Log In -->
+      <div id="nav-guest-actions" style="display: flex; align-items: center; gap: 10px;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="AuthUI.openSignInModal('login')">
+          Log In
+        </button>
+      </div>
+
+      <!-- Logged-In State: Newspaper B&W PFP with dropdown -->
+      <div id="nav-user-profile" style="display: none; align-items: center; gap: 10px; position: relative;">
+        <div class="user-pfp-wrapper" onclick="AuthUI.togglePfpMenu(event)" title="User Profile">
+          <img src="static/images/avatar_newspaper.jpg" alt="User Avatar" class="newspaper-pfp" id="nav-pfp-img">
+        </div>
+
+        <div class="pfp-dropdown-menu" id="pfp-dropdown-menu">
+          <div class="pfp-dropdown-header">
+            <img src="static/images/avatar_newspaper.jpg" alt="User Profile" class="newspaper-pfp-sm">
+            <div>
+              <div class="pfp-dropdown-name">Alex Vance</div>
+              <div class="pfp-dropdown-email" id="nav-user-email">alex@brandverify.ai</div>
+            </div>
+          </div>
+          <a href="dashboard.html" class="pfp-dropdown-item">Managed Brands</a>
+          <a href="brand.html" class="pfp-dropdown-item">Compliance Workspace</a>
+          <div class="pfp-dropdown-divider"></div>
+          <button type="button" class="pfp-dropdown-item text-danger" onclick="AuthUI.signOut()">Log Out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container">
+
+    <!-- Dashboard Title Banner -->
+    <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 30px; flex-wrap: wrap; gap: 16px;">
+      <div>
+        <h1 style="font-size: 2.2rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 6px;">
+          Your Managed Brands
+        </h1>
+        <p style="font-size: 0.95rem; color: var(--text-secondary);">
+          Select a brand to manage its logos, palettes, and product rights, or run a pre-flight content scan.
+        </p>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <button type="button" class="btn btn-white btn-sm" onclick="BrandManager.openAddBrandModal()">
+          + Add New Brand
+        </button>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         MANAGED BRANDS GRID (No Rulebook Box - Clean Minimalist)
+         ==================================================================== -->
+    <section class="brands-grid" id="managed-brands-container">
+      
+      <!-- Brand 1: Acme Global -->
+      <div class="brand-card" id="card-acme-tech">
+        <div class="brand-card-header">
+          <div class="brand-avatar-box" style="background: linear-gradient(135deg, #27272a, #3f3f46);">
+            AT
+          </div>
+          <div>
+            <div class="brand-card-title">Acme Global Technologies</div>
+            <div class="brand-card-industry">Enterprise Cloud & SaaS</div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <a href="brand.html?id=acme-tech" class="btn btn-white btn-sm" style="flex: 1;">
+            Manage Brand →
+          </a>
+          <button type="button" class="btn-icon-danger" onclick="BrandManager.promptDeleteBrand('acme-tech', 'Acme Global Technologies')" title="Delete Brand" aria-label="Delete Brand">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Brand 2: Luxe & Co. -->
+      <div class="brand-card" id="card-luxe-fashion">
+        <div class="brand-card-header">
+          <div class="brand-avatar-box" style="background: linear-gradient(135deg, #18181b, #27272a);">
+            LC
+          </div>
+          <div>
+            <div class="brand-card-title">Luxe & Co. Haute Couture</div>
+            <div class="brand-card-industry">Luxury Fashion & Retail</div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <a href="brand.html?id=luxe-fashion" class="btn btn-white btn-sm" style="flex: 1;">
+            Manage Brand →
+          </a>
+          <button type="button" class="btn-icon-danger" onclick="BrandManager.promptDeleteBrand('luxe-fashion', 'Luxe & Co. Haute Couture')" title="Delete Brand" aria-label="Delete Brand">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Brand 3: Apex Financial -->
+      <div class="brand-card" id="card-apex-finance">
+        <div class="brand-card-header">
+          <div class="brand-avatar-box" style="background: linear-gradient(135deg, #3f3f46, #52525b);">
+            AF
+          </div>
+          <div>
+            <div class="brand-card-title">Apex Financial Partners</div>
+            <div class="brand-card-industry">Asset Management & FinTech</div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <a href="brand.html?id=apex-finance" class="btn btn-white btn-sm" style="flex: 1;">
+            Manage Brand →
+          </a>
+          <button type="button" class="btn-icon-danger" onclick="BrandManager.promptDeleteBrand('apex-finance', 'Apex Financial Partners')" title="Delete Brand" aria-label="Delete Brand">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Brand 4: Pulse BioHealth -->
+      <div class="brand-card" id="card-pulse-health">
+        <div class="brand-card-header">
+          <div class="brand-avatar-box" style="background: linear-gradient(135deg, #27272a, #18181b);">
+            PB
+          </div>
+          <div>
+            <div class="brand-card-title">Pulse BioHealth & Nutrition</div>
+            <div class="brand-card-industry">Clinical Biotechnology</div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <a href="brand.html?id=pulse-health" class="btn btn-white btn-sm" style="flex: 1;">
+            Manage Brand →
+          </a>
+          <button type="button" class="btn-icon-danger" onclick="BrandManager.promptDeleteBrand('pulse-health', 'Pulse BioHealth & Nutrition')" title="Delete Brand" aria-label="Delete Brand">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Add New Brand Card -->
+      <div class="brand-add-card" onclick="BrandManager.openAddBrandModal()">
+        <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(255, 255, 255, 0.06); border: 1px solid var(--border-default); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 12px;">
+          +
+        </div>
+        <div style="font-weight: 700; color: #ffffff; font-size: 1.05rem; margin-bottom: 4px;">
+          Add Extra Brand
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); max-width: 220px;">
+          Configure new logos, rulebooks, color palettes, and product rights.
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ADD NEW BRAND MODAL -->
+  <div class="modal-backdrop" id="add-brand-modal">
+    <div class="modal-box">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+        <h2 style="font-size: 1.3rem; font-weight: 800; color: #fff;">
+          Add a New Brand
+        </h2>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="BrandManager.closeAddBrandModal()" style="padding: 4px 10px;">✕</button>
+      </div>
+
+      <form onsubmit="BrandManager.addNewBrand(event)">
+        <div class="form-group">
+          <label class="form-label" for="new-brand-name">Brand Name</label>
+          <input type="text" id="new-brand-name" class="form-control" required placeholder="e.g. Acme Corp, Horizon, Nova">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="new-brand-industry">Industry / Category</label>
+          <input type="text" id="new-brand-industry" class="form-control" required placeholder="e.g. Enterprise Cloud, FinTech, Luxury Retail">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Upload Brand Logo</label>
+          <input type="file" class="form-control" accept="image/*">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="new-brand-rulebook">Initial Rulebook or Guidelines</label>
+          <input type="text" id="new-brand-rulebook" class="form-control" placeholder="e.g. Standard Brand Guidelines v1.0">
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="BrandManager.closeAddBrandModal()">Cancel</button>
+          <button type="submit" class="btn btn-white btn-sm">Create Brand</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- DELETE BRAND CONFIRMATION WARNING MODAL -->
+  <div class="modal-backdrop" id="delete-brand-modal">
+    <div class="modal-box" style="border-color: rgba(255, 255, 255, 0.2); max-width: 480px;">
+      <div style="display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px;">
+        <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2); display: flex; align-items: center; justify-content: center; color: #ffffff; flex-shrink: 0;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        </div>
+        <div>
+          <h3 style="font-size: 1.25rem; font-weight: 800; color: #fff; margin-bottom: 6px;">
+            Delete Brand Profile?
+          </h3>
+          <p style="font-size: 0.88rem; color: #d4d4d8; line-height: 1.5;" id="delete-brand-warning-text">
+            Are you sure you want to permanently delete this brand?
+          </p>
+        </div>
+      </div>
+
+      <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: var(--radius-md); padding: 14px; margin-bottom: 24px; font-size: 0.84rem; color: #a1a1aa; line-height: 1.5;">
+        ⚠️ <strong>Warning:</strong> All data, rulebooks, uploaded guidelines, assets, and compliance scan history for this brand will be permanently lost. This action cannot be undone.
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="BrandManager.closeDeleteModal()">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-white btn-sm" id="confirm-delete-btn" onclick="BrandManager.executeDeleteBrand()">
+          Yes, Delete Brand
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sign In Modal -->
+  <div class="modal-backdrop" id="sign-in-modal">
+    <div class="modal-box">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+        <img src="static/images/BrandVerify.svg" alt="BrandVerify" style="height: 26px;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="AuthUI.closeSignInModal()" style="padding: 4px 10px;">✕</button>
+      </div>
+
+      <div style="display: flex; gap: 8px; margin-bottom: 20px; background: rgba(0,0,0,0.5); padding: 4px; border-radius: 9999px; border: 1px solid var(--border-subtle);">
+        <button type="button" id="tab-btn-login" class="btn btn-white btn-sm" style="flex: 1;" onclick="AuthUI.switchAuthTab('login')">
+          Log In
+        </button>
+        <button type="button" id="tab-btn-signup" class="btn btn-secondary btn-sm" style="flex: 1; border: none;" onclick="AuthUI.switchAuthTab('signup')">
+          Sign Up
+        </button>
+      </div>
+
+      <h3 id="auth-modal-title" style="font-size: 1.25rem; font-weight: 800; color: #fff; margin-bottom: 6px;">
+        Log In to BrandVerify
+      </h3>
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 20px;">
+        Access your managed brands, rulebooks, and compliance review queue.
+      </p>
+
+      <form id="quick-sign-in-form" onsubmit="AuthUI.handleSignInSubmit(event)">
+        <div class="form-group">
+          <label class="form-label" for="signin-email">Work Email</label>
+          <input type="email" id="signin-email" class="form-control" value="alex@brandverify.ai" required>
+        </div>
+
+        <div class="form-group">
+          <div class="form-label">
+            <label for="signin-password">Password</label>
+            <a href="#" style="font-size: 0.78rem; color: var(--text-secondary);">Forgot?</a>
+          </div>
+          <input type="password" id="signin-password" class="form-control" value="••••••••••••" required>
+        </div>
+
+        <button type="submit" id="auth-submit-btn" class="btn btn-white" style="width: 100%; margin-bottom: 12px; padding: 12px;">
+          Log In
+        </button>
+
+        <button type="button" class="btn btn-secondary" style="width: 100%; padding: 12px;" onclick="AuthUI.skipSignIn()">
+          Continue as Guest & Explore
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="static/js/app.js"></script>
+</body>
+</html>
