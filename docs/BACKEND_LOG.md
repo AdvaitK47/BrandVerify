@@ -89,3 +89,13 @@ Step 13 DONE: scan history
   - Known: ai_explainer.explain_findings is a blocking call inside an async
     route (can hold up other requests for up to 20s). Fix later with
     run_in_threadpool.
+
+Step 14 DONE: API tests for scan history
+  - New: backend/tests/conftest.py (sets a temporary DATABASE_URL BEFORE any
+    backend import; fixture "client" replaces the AI call with a fixed text).
+  - New: backend/tests/test_api_scans.py (7 tests: throwaway-DB safety check,
+    save + list, get by id, 404, filter by brand, empty text 400, limit 422).
+  - Result: 13 tests pass. Real brandverify.db untouched.
+  - Rule: conftest.py must stay free of any backend import above the
+    DATABASE_URL line.
+  - Undo: git revert <commit "Add API tests for scan history using a throwaway database">
