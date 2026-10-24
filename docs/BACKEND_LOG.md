@@ -99,3 +99,6 @@ Step 14 DONE: API tests for scan history
   - Rule: conftest.py must stay free of any backend import above the
     DATABASE_URL line.
   - Undo: git revert <commit "Add API tests for scan history using a throwaway database">
+
+Step 14 CONFIRMED: 13 passed, real brandverify.db untouched (2 scans).
+  - Undo for step 14: git revert f46c2eb
