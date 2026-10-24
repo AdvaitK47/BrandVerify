@@ -72,3 +72,20 @@ Step 12. Scan storage
     audio and video, and marks info-only results as warnings_detected.
 
 Step 12 CONFIRMED: fake-scan test passed (LIST had test-1, GET True, MISS None).
+
+Step 13 DONE: scan history
+  - New: backend/api/scans.py (GET /api/v1/scans, GET /api/v1/scans/{scan_id}).
+  - Edited: backend/api/verify.py (text scans saved via run_in_threadpool;
+    a save failure is logged and does not break the scan),
+    backend/api/__init__.py (router registered), backend/models/scan.py
+    (ScanSummary added), backend/main.py (init_db() at startup via lifespan).
+  - Verified: browser scan (25) and curl scan (70) both listed via
+    GET /api/v1/scans; a fresh Python process reads them from brandverify.db.
+    6 tests pass.
+  - Undo: git revert <commit "Save text scans to database; add scan history endpoints">
+  - NOT YET DONE: automated API tests (need a separate test database so
+    tests do not write to brandverify.db). Only /verify/text saves scans;
+    /verify/upload does not save yet (it still returns mock data).
+  - Known: ai_explainer.explain_findings is a blocking call inside an async
+    route (can hold up other requests for up to 20s). Fix later with
+    run_in_threadpool.
