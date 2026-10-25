@@ -72,6 +72,7 @@ MOCK_BRANDS_DB: Dict[str, BrandProfile] = {
         )
     ),
 }
+MOCK_BRANDS_DB["apex-finance"] = MOCK_BRANDS_DB["apex-fin"]
 
 @router.get("", response_model=List[BrandProfile])
 async def list_brands():

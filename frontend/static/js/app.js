@@ -166,7 +166,29 @@ const DEFAULT_BRANDS = {
     industry: 'Enterprise Cloud & SaaS',
     rulebook: 'FTC Tech & Cloud Claims v3.2',
     rulebookText: 'Prohibited terms: guaranteed 100% bug-free, zero downtime, infinitely scalable. Mandatory disclaimer: Benchmark claims audited by CloudMetrics Labs Q3 2026.',
-    palettes: '#ffffff (Primary Light), #a1a1aa (Subtle Zinc), #18181b (Deep Noir)'
+    palettes: '#ffffff (Primary Light), #a1a1aa (Subtle Zinc), #18181b (Deep Noir)',
+    sampleCopy: 'BrandVerify CloudScale engine is guaranteed to be 10X faster than any competitor on the market with zero downtime. Upgrade today to eliminate all latency across your multi-tenant asset pipeline.',
+    rulebookAssets: [
+      { icon: '📄', name: 'Acme_FTC_CloudClaims_v3.2.pdf', meta: '42 Claim Rules Indexed', badge: 'Active' },
+      { icon: '🖼️', name: 'Acme_Primary_Vector_Logo.svg', meta: 'Clear space minimum 32px', badge: 'Active' },
+      { icon: '🎨', name: 'Acme_Cloud_Palette.json', meta: '3 Approved Swatches (ΔE < 2.5)', badge: 'Active' },
+      { icon: '⚖️', name: 'Cloud_SLA_Safe_Harbor.docx', meta: 'Mandatory Uptime Substantiations', badge: 'Active' },
+      { icon: '📝', name: 'Benchmark_Duration_Rules.txt', meta: 'Speed claims require >= 2s display', badge: 'Active' }
+    ],
+    recentScan: {
+      id: 'BV-8492',
+      title: 'CloudScale Engine Q4 Launch Copy',
+      score: 68,
+      statusClass: 'badge-fail',
+      statusText: 'Action Required (68% Score)',
+      originalCopy: 'BrandVerify CloudScale engine is <span class="diff-del">guaranteed to be 10X faster than any competitor on the market</span> with <span class="diff-del">zero downtime</span>. Upgrade today to eliminate all latency across your multi-tenant asset pipeline.',
+      suggestedCopy: 'BrandVerify CloudScale engine is <span class="diff-ins">engineered to deliver up to 10X faster benchmark processing</span> according to verified Q3 internal lab benchmarks. Seamlessly integrate your multi-tenant asset pipeline with <span class="diff-ins">guaranteed compliance logging</span>.',
+      footnote: 'Audited Footnote: Benchmark claims audited by CloudMetrics Labs Q3 2026. Individual performance may vary.',
+      flags: [
+        { type: 'critical', label: 'Critical Claim Flag', text: '"guaranteed to be 10X faster" lacks benchmark audit reference.' },
+        { type: 'warning', label: 'Warning Flag', text: '"zero downtime" is an absolute SLA guarantee prohibited by rulebook.' }
+      ]
+    }
   },
   'luxe-fashion': {
     id: 'luxe-fashion',
@@ -176,7 +198,29 @@ const DEFAULT_BRANDS = {
     industry: 'Luxury Fashion & Retail',
     rulebook: 'EU Green Claims Directive v2.8',
     rulebookText: 'Mandatory disclaimer: 100% GOTS certified organic silk. Prohibited: zero-impact claims without LCA audit.',
-    palettes: '#ffffff (Pure White), #d4d4d8 (Silver Silk), #121215 (Obsidian)'
+    palettes: '#ffffff (Pure White), #d4d4d8 (Silver Silk), #121215 (Obsidian)',
+    sampleCopy: 'Our luxury silk collection has zero impact on the environment and is 100% eco-friendly. Indulge in guilt-free pure haute couture handcrafted in Paris.',
+    rulebookAssets: [
+      { icon: '📄', name: 'EU_Green_Claims_Directive_v2.8.pdf', meta: '36 Sustainability Rules Indexed', badge: 'Active' },
+      { icon: '🖼️', name: 'Luxe_Haute_Couture_Emblem.svg', meta: 'Minimum 48px exclusion zone', badge: 'Active' },
+      { icon: '🎨', name: 'Luxe_Monochrome_Silk_Palette.json', meta: 'Approved Swatches (#ffffff, #d4d4d8, #121215)', badge: 'Active' },
+      { icon: '⚖️', name: 'Organic_Textile_LCA_Policy.docx', meta: 'GOTS & OEKO-TEX Standard 100', badge: 'Active' },
+      { icon: '📝', name: 'Recycled_Packaging_Rules.txt', meta: 'Carbon neutrality claims prohibited without certificate', badge: 'Active' }
+    ],
+    recentScan: {
+      id: 'BV-9104',
+      title: 'Autumn Runway - Zero Impact Silk Ad',
+      score: 72,
+      statusClass: 'badge-fail',
+      statusText: 'Review Required (72% Score)',
+      originalCopy: 'Our luxury silk collection has <span class="diff-del">zero impact on the environment</span> and is <span class="diff-del">100% eco-friendly</span>. Indulge in guilt-free pure haute couture handcrafted in Paris.',
+      suggestedCopy: 'Our luxury silk collection is <span class="diff-ins">crafted from 100% GOTS-certified organic silk</span> with <span class="diff-ins">45% verified reduction in water consumption</span> compared to standard milling.',
+      footnote: 'Verified under EU Green Claims Directive (LCA Life-Cycle Assessment audit #2026-EU-441).',
+      flags: [
+        { type: 'critical', label: 'Critical Green Claim', text: '"zero impact on the environment" is an unverified absolute environmental claim.' },
+        { type: 'warning', label: 'Warning Flag', text: '"100% eco-friendly" requires verified life-cycle carbon accounting.' }
+      ]
+    }
   },
   'apex-finance': {
     id: 'apex-finance',
@@ -186,7 +230,29 @@ const DEFAULT_BRANDS = {
     industry: 'Asset Management & FinTech',
     rulebook: 'SEC Disclosure Rule 10b-5 & FINRA 2210',
     rulebookText: 'Mandatory safe harbor disclaimer on all performance charts. Prohibited: guaranteed returns.',
-    palettes: '#f4f4f5 (Fine Pewter), #71717a (Charcoal), #09090b (Dark Void)'
+    palettes: '#f4f4f5 (Fine Pewter), #71717a (Charcoal), #09090b (Dark Void)',
+    sampleCopy: 'Apex AlphaFund yields a guaranteed 14% annual return with zero risk to principal. Maximize your portfolio yields with automated wealth compounding.',
+    rulebookAssets: [
+      { icon: '📄', name: 'SEC_Rule_10b5_FINRA_2210_Compliance.pdf', meta: '58 Financial Claim Rules Indexed', badge: 'Active' },
+      { icon: '🖼️', name: 'Apex_Partners_Monochrome_Lockup.svg', meta: 'Minimum 40px safe zone', badge: 'Active' },
+      { icon: '🎨', name: 'Apex_Pewter_Palette.json', meta: 'Approved Swatches (#f4f4f5, #71717a, #09090b)', badge: 'Active' },
+      { icon: '⚖️', name: 'FINRA_Safe_Harbor_Disclaimers.docx', meta: 'Mandatory past-performance risk disclaimer', badge: 'Active' },
+      { icon: '📝', name: 'Broker_Dealer_Ad_Rules.txt', meta: 'Fixed return claims strictly barred', badge: 'Active' }
+    ],
+    recentScan: {
+      id: 'BV-7321',
+      title: 'AlphaFund Yield Growth Social Ad',
+      score: 55,
+      statusClass: 'badge-fail',
+      statusText: 'Action Required (55% Score)',
+      originalCopy: 'Apex AlphaFund yields a <span class="diff-del">guaranteed 14% annual return</span> with <span class="diff-del">zero risk to principal</span>. Maximize your portfolio yields with automated wealth compounding.',
+      suggestedCopy: 'Apex AlphaFund targets <span class="diff-ins">historical 14% annualized performance</span> across diversified fixed-income assets. <span class="diff-ins">Capital at risk; past performance is no guarantee of future returns</span>.',
+      footnote: 'Securities offered through Apex Capital Brokerage. Member FINRA/SIPC. Not FDIC insured.',
+      flags: [
+        { type: 'critical', label: 'Critical Securities Flag', text: '"guaranteed 14% annual return" violates SEC Rule 10b-5 and FINRA Rule 2210.' },
+        { type: 'critical', label: 'Critical Risk Flag', text: '"zero risk to principal" is deceptive in securities marketing.' }
+      ]
+    }
   },
   'pulse-health': {
     id: 'pulse-health',
@@ -196,7 +262,29 @@ const DEFAULT_BRANDS = {
     industry: 'Clinical Biotechnology',
     rulebook: 'FDA Dietary Health Claims v4.1',
     rulebookText: 'Mandatory FDA disclaimer: These statements have not been evaluated by the FDA.',
-    palettes: '#ffffff (Clinical White), #a1a1aa (Mid Grey), #18181b (Deep Midnight)'
+    palettes: '#ffffff (Clinical White), #a1a1aa (Mid Grey), #18181b (Deep Midnight)',
+    sampleCopy: 'NutriBoost is clinically proven to cure chronic fatigue and permanently reverse cellular aging in just 14 days.',
+    rulebookAssets: [
+      { icon: '📄', name: 'FDA_21CFR_Dietary_Supplement_Rules.pdf', meta: '64 Health Claim Rules Indexed', badge: 'Active' },
+      { icon: '🖼️', name: 'Pulse_BioHealth_Verified_Badge.svg', meta: 'Mandatory packaging certification badge', badge: 'Active' },
+      { icon: '🎨', name: 'Pulse_Clinical_Palette.json', meta: 'Approved Swatches (#ffffff, #a1a1aa, #18181b)', badge: 'Active' },
+      { icon: '⚖️', name: 'DSHEA_Disclaimer_Mandates.docx', meta: 'Section 403(r)(6) statutory notice', badge: 'Active' },
+      { icon: '📝', name: 'Clinical_Trial_Citations.txt', meta: 'Double-blind human trial references required', badge: 'Active' }
+    ],
+    recentScan: {
+      id: 'BV-6839',
+      title: 'NutriBoost Vitality Serum Commercial Copy',
+      score: 60,
+      statusClass: 'badge-fail',
+      statusText: 'Action Required (60% Score)',
+      originalCopy: 'NutriBoost is <span class="diff-del">clinically proven to cure chronic fatigue</span> and <span class="diff-del">permanently reverse cellular aging</span> in just 14 days.',
+      suggestedCopy: 'NutriBoost is <span class="diff-ins">formulated to support cellular energy metabolism</span> based on preliminary double-blind clinical evaluations. <span class="diff-ins">These statements have not been evaluated by the FDA</span>.',
+      footnote: 'This product is not intended to diagnose, treat, cure, or prevent any disease.',
+      flags: [
+        { type: 'critical', label: 'Critical Medical Claim', text: '"clinically proven to cure" makes an unauthorized disease treatment claim under FDA rules.' },
+        { type: 'critical', label: 'Mandatory Footnote Missing', text: 'Missing required FDA DSHEA statutory disclaimer.' }
+      ]
+    }
   }
 };
 
@@ -209,7 +297,23 @@ const BrandManager = {
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        if (Object.keys(parsed).length > 0) return parsed;
+        if (Object.keys(parsed).length > 0) {
+          // Merge with DEFAULT_BRANDS so new fields (rulebookAssets, recentScan, sampleCopy) are populated
+          let updated = false;
+          Object.keys(DEFAULT_BRANDS).forEach(k => {
+            if (!parsed[k]) {
+              parsed[k] = DEFAULT_BRANDS[k];
+              updated = true;
+            } else if (!parsed[k].rulebookAssets || !parsed[k].recentScan) {
+              parsed[k] = { ...DEFAULT_BRANDS[k], ...parsed[k], rulebookAssets: DEFAULT_BRANDS[k].rulebookAssets, recentScan: DEFAULT_BRANDS[k].recentScan, sampleCopy: DEFAULT_BRANDS[k].sampleCopy };
+              updated = true;
+            }
+          });
+          if (updated) {
+            localStorage.setItem('bv_brand_data', JSON.stringify(parsed));
+          }
+          return parsed;
+        }
       } catch (err) {
         console.error('Error reading brands from storage', err);
       }
@@ -240,7 +344,12 @@ const BrandManager = {
       return;
     }
 
-    const brandId = (requestedId && brands[requestedId]) ? requestedId : keys[0];
+    // Alias normalization
+    let targetId = requestedId;
+    if (targetId === 'apex-fin' && brands['apex-finance']) targetId = 'apex-finance';
+    if (targetId === 'apex-finance' && !brands['apex-finance'] && brands['apex-fin']) targetId = 'apex-fin';
+
+    const brandId = (targetId && brands[targetId]) ? targetId : keys[0];
     this.currentBrandId = brandId;
     const data = brands[brandId];
 
@@ -272,6 +381,80 @@ const BrandManager = {
       industryEl.innerHTML = `${data.industry} • Active Rulebook: <strong style="color: #fff;">${data.rulebook}</strong>`;
     }
     if (rulebookEl) rulebookEl.textContent = data.rulebook;
+
+    // 1. Dynamically Render Brand Rulebook Assets & Index
+    const rulebookList = document.getElementById('rulebook-items-list');
+    if (rulebookList && data.rulebookAssets) {
+      rulebookList.innerHTML = '';
+      data.rulebookAssets.forEach(item => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(255,255,255,0.03); border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);';
+        row.innerHTML = `
+          <span>${item.icon} <strong>${item.name}</strong> — <em style="color:var(--text-muted);font-size:0.8rem;">${item.meta}</em></span>
+          <span class="badge badge-pass">${item.badge}</span>
+        `;
+        rulebookList.appendChild(row);
+      });
+    }
+
+    // 2. Dynamically Render Recent Scans & Side-by-Side Diff Comparison
+    if (data.recentScan) {
+      const scan = data.recentScan;
+      const scanTitleEl = document.querySelector('#section-recent h3');
+      const scanIdEl = document.querySelector('#section-recent .mono');
+      const scanBadgeEl = document.querySelector('#section-recent .badge');
+      const origPane = document.getElementById('original-copy-pane');
+      const aiPane = document.getElementById('ai-suggested-pane');
+
+      if (scanTitleEl) scanTitleEl.textContent = scan.title;
+      if (scanIdEl) scanIdEl.textContent = `ID: ${scan.id}`;
+      if (scanBadgeEl) {
+        scanBadgeEl.className = `badge ${scan.statusClass || 'badge-fail'}`;
+        scanBadgeEl.innerHTML = `<span class="badge-dot"></span>${scan.statusText}`;
+      }
+
+      if (origPane) {
+        origPane.innerHTML = `
+          <div style="font-weight: 700; color: #cbd5e1; font-size: 0.82rem; margin-bottom: 8px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 6px;">
+            Original Submitted Copy
+          </div>
+          <p style="color: #cbd5e1;">${scan.originalCopy}</p>
+        `;
+      }
+
+      if (aiPane) {
+        aiPane.innerHTML = `
+          <div style="font-weight: 700; color: #86efac; font-size: 0.82rem; margin-bottom: 8px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 6px;">
+            AI Recommended Compliant Copy
+          </div>
+          <p style="color: #ffffff;">${scan.suggestedCopy}</p>
+          <div style="margin-top: 10px; font-size: 0.76rem; color: #94a3b8; border-top: 1px solid var(--border-subtle); padding-top: 6px;">
+            ${scan.footnote || ''}
+          </div>
+        `;
+      }
+
+      // Update callout flag boxes
+      const flagsContainer = document.querySelector('#section-recent .diff-container + div');
+      if (flagsContainer && scan.flags) {
+        flagsContainer.innerHTML = '';
+        scan.flags.forEach(f => {
+          const isCrit = f.type === 'critical';
+          const box = document.createElement('div');
+          box.style.cssText = isCrit
+            ? 'background: var(--review-red-bg); border-left: 3px solid var(--review-red); padding: 10px 14px; border-radius: 4px;'
+            : 'background: var(--review-yellow-bg); border-left: 3px solid var(--review-yellow); padding: 10px 14px; border-radius: 4px;';
+          box.innerHTML = `<strong style="color: ${isCrit ? 'var(--review-red)' : 'var(--review-yellow)'};">${f.label}:</strong> ${f.text}`;
+          flagsContainer.appendChild(box);
+        });
+      }
+    }
+
+    // 3. Update Text Checker sample copy to match brand
+    const copyInput = document.getElementById('copy-text-input');
+    if (copyInput && data.sampleCopy) {
+      copyInput.value = data.sampleCopy;
+    }
   },
 
   switchActiveBrand(brandId) {

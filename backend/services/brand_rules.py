@@ -33,6 +33,8 @@ def load_rules(brand_id: Optional[str] = None) -> RuleSet:
     """Rules for this brand, or the default rules if it has no file."""
     files = _available_files()
     key = (brand_id or "").strip().lower()
+    if key == "apex-finance":
+        key = "apex-fin"
 
     if key and key != DEFAULT_RULES and key in files:
         return _parse(files[key], key)
