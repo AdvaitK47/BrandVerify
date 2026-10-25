@@ -7,6 +7,25 @@
 // ==========================================================================
 // 1. Auth UI & Session State (Handles Log In / Sign Up / Newspaper PFP)
 // ==========================================================================
+// Empty = same origin (page served by FastAPI). Set window.BV_API_BASE before this script to override.
+const API_BASE_URL = window.BV_API_BASE || "";
+
+async function apiRequest(path, options = {}) {
+    const response = await fetch(
+        `${API_BASE_URL}${path}`,
+        options
+    );
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+        throw new Error(
+            data.detail || `Request failed: ${response.status}`
+        );
+    }
+
+    return data;
+}
 const AuthUI = {
   currentTab: 'login',
 
@@ -370,10 +389,10 @@ async runCheck(e, type) {
 
   // Keep the other checker tabs unchanged for now.
   if (type !== 'Text Copy') {
-    Toast.show(
-      `${type} checker integration is not connected yet.`,
-      'info'
-    );
+    if (typeof CheckerAPI !== 'undefined') {
+      return CheckerAPI.run(form, type, this.currentBrandId || 'acme-tech');
+    }
+    Toast.show(`${type} checker integration is not connected yet.`, 'info');
     return;
   }
 
@@ -729,7 +748,12 @@ const Toast = {
 
     const toast = document.createElement('div');
     toast.className = 'toast';
-    toast.innerHTML = `<span style="color:#ffffff; font-size:0.75rem;">●</span><span>${message}</span>`;
+    const dot = document.createElement('span');
+    dot.style.cssText = 'color:#ffffff; font-size:0.75rem;';
+    dot.textContent = '●';
+    const msg = document.createElement('span');
+    msg.textContent = message;
+    toast.append(dot, msg);
     this.container.appendChild(toast);
 
     setTimeout(() => {
@@ -744,3 +768,141 @@ const Toast = {
 document.addEventListener('DOMContentLoaded', () => {
   AuthUI.init();
 });
+
+const imageForm = document.getElementById("imageScanForm");
+
+if (imageForm) {
+    imageForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const file = document.getElementById("imageFile").files[0];
+        const colors = document
+            .getElementById("approvedColors")
+            .value
+            .split(",")
+            .map(color => color.trim())
+            .filter(Boolean);
+
+        const status = document.getElementById("scanStatus");
+        const results = document.getElementById("scanResults");
+
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("brand_id", "brand_demo");
+        formData.append("approved_colors", JSON.stringify(colors));
+
+        status.textContent = "Scanning image...";
+        results.replaceChildren();
+
+        try {
+            const data = await apiRequest("/api/images/scan", {
+                method: "POST",
+                body: formData
+            });
+
+            status.textContent = "Scan completed.";
+
+            // Display the returned data safely.
+            const output = document.createElement("pre");
+            output.textContent = JSON.stringify(data, null, 2);
+            results.appendChild(output);
+
+        } catch (error) {
+            status.textContent = `Scan failed: ${error.message}`;
+        }
+    });
+}
+
+// ==========================================================================
+// 5. Audio & Video Compliance Scan Handlers
+// ==========================================================================
+
+// Audio Scan Form Handler
+const audioForm = document.getElementById("audioScanForm");
+if (audioForm) {
+    audioForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const fileInput = document.getElementById("audioFile");
+        const status = document.getElementById("audioScanStatus") || document.getElementById("scanStatus");
+        const results = document.getElementById("audioScanResults") || document.getElementById("scanResults");
+
+        if (!fileInput || !fileInput.files[0]) {
+            Toast.show("Please select an audio file.", "error");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+        formData.append("target_lufs", "-24.0");
+        formData.append("tolerance_lu", "1.0");
+
+        if (status) status.textContent = "Transcribing audio and measuring loudness...";
+        if (results) results.replaceChildren();
+
+        try {
+            const data = await apiRequest("/api/media/audio/scan", {
+                method: "POST",
+                body: formData
+            });
+
+            if (status) status.textContent = `Audio scan completed (Status: ${data.overall_status}).`;
+            Toast.show("Audio compliance check successful!", "success");
+
+            const output = document.createElement("pre");
+            output.textContent = JSON.stringify(data, null, 2);
+            if (results) results.appendChild(output);
+
+        } catch (error) {
+            if (status) status.textContent = `Audio scan failed: ${error.message}`;
+            Toast.show(`Audio scan failed: ${error.message}`, "error");
+        }
+    });
+}
+
+// Video Ad Scan Form Handler
+const videoForm = document.getElementById("videoScanForm");
+if (videoForm) {
+    videoForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const fileInput = document.getElementById("videoFile");
+        const disclaimerInput = document.getElementById("requiredDisclaimer");
+        const status = document.getElementById("videoScanStatus") || document.getElementById("scanStatus");
+        const results = document.getElementById("videoScanResults") || document.getElementById("scanResults");
+
+        if (!fileInput || !fileInput.files[0]) {
+            Toast.show("Please select a video file.", "error");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+        formData.append("required_disclaimer", disclaimerInput ? disclaimerInput.value : "Terms apply");
+        formData.append("target_lufs", "-24.0");
+        formData.append("tolerance_lu", "1.0");
+
+        if (status) status.textContent = "Analyzing video frames, scene cuts, OCR, and audio track...";
+        if (results) results.replaceChildren();
+
+        try {
+            const data = await apiRequest("/api/media/video/scan", {
+                method: "POST",
+                body: formData
+            });
+
+            if (status) status.textContent = `Video ad scan completed (Overall Status: ${data.overall_status}).`;
+            Toast.show("Video ad compliance check successful!", "success");
+
+            const output = document.createElement("pre");
+            output.textContent = JSON.stringify(data, null, 2);
+            if (results) results.appendChild(output);
+
+        } catch (error) {
+            if (status) status.textContent = `Video scan failed: ${error.message}`;
+            Toast.show(`Video scan failed: ${error.message}`, "error");
+        }
+    });
+}

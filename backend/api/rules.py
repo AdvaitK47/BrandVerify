@@ -6,7 +6,10 @@ from fastapi import APIRouter
 from typing import List
 from backend.models.brand import Rulebook
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/api/rules",
+    tags=["Rulebooks"]
+)
 
 GLOBAL_RULEBOOKS: List[Rulebook] = [
     Rulebook(

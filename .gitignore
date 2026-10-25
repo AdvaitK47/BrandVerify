@@ -1,4 +1,6 @@
 venv/
+new-branch/
+new-version/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
