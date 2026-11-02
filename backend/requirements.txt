@@ -11,11 +11,17 @@ numpy>=1.26.4
 python-jose[cryptography]>=3.3.0
 passlib[bcrypt]>=1.7.4
 pytest>=8.2.0
-PyMuPDF>=1.24.2
 python-docx>=1.1.0
-opencv-python-headless>=4.9.0.80
-scipy>=1.13.0
-scikit-image>=0.23.2
+openai>=1.40.0
 soundfile>=0.12.1
-pyloudnorm>=0.1.0
-faster-whisper>=1.0.0
+
+# Optional heavier modules kept for compliance services but not required for the base deployment.
+# Install them only when you specifically need the advanced processing path.
+# pyloudnorm>=0.1.0
+# faster-whisper>=1.0.0
+# opencv-python-headless>=4.9.0.80
+# scikit-image>=0.23.2
+# scipy>=1.13.0
+# PyMuPDF>=1.24.2
+# pytesseract>=0.3.10
+# scenedetect[opencv]>=0.6.3
