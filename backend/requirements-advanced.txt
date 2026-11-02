@@ -1,0 +1,8 @@
+pyloudnorm>=0.1.0
+faster-whisper>=1.0.0
+opencv-python-headless>=4.9.0.80
+scikit-image>=0.23.2
+scipy>=1.13.0
+PyMuPDF>=1.24.2
+pytesseract>=0.3.10
+scenedetect[opencv]>=0.6.3
